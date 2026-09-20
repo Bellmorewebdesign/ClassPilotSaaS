@@ -1,0 +1,30 @@
+{
+  "name": "classpilot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ClassPilot - AI workspace for students. V1: Chrome extension syncs Google Classroom into the ClassPilot backend.",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "pnpm --filter @classpilot/shared build && pnpm --filter @classpilot/api build && pnpm --filter @classpilot/extension build && pnpm --filter @classpilot/web build",
+    "dev": "pnpm --filter @classpilot/shared build && concurrently -n shared,api,web,ext -c cyan,green,magenta,yellow \"pnpm --filter @classpilot/shared dev\" \"pnpm --filter @classpilot/api dev\" \"pnpm --filter @classpilot/web dev\" \"pnpm --filter @classpilot/extension dev\"",
+    "dev:api": "pnpm --filter @classpilot/shared build && pnpm --filter @classpilot/api dev",
+    "dev:web": "pnpm --filter @classpilot/shared build && pnpm --filter @classpilot/web dev",
+    "build:extension": "pnpm --filter @classpilot/shared build && pnpm --filter @classpilot/extension build",
+    "typecheck": "pnpm --filter @classpilot/shared build && pnpm -r typecheck",
+    "test": "pnpm --filter @classpilot/shared build && pnpm -r test",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
