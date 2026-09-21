@@ -24,12 +24,12 @@ export function normalizeText(
 
   const cleaned = value
     // Zero-width space / non-joiner / joiner / BOM.
-    .replace(/[​-‍﻿]/g, '')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
     // Control chars except tab/newline/carriage-return.
     // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
     // Non-breaking space and friends behave like ordinary spaces.
-    .replace(/[   ]/g, ' ')
+    .replace(/[\u00A0\u2007\u202F]/g, ' ')
     .replace(/[ \t]+/g, ' ')
     .replace(/ ?\r?\n ?/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
@@ -47,7 +47,7 @@ export function normalizeLongText(value: unknown): string | null {
 /**
  * Normalize a URL for storage.
  *
- * Rejects anything that is not http(s) — this is the guard that stops a
+ * Rejects anything that is not http(s) -- this is the guard that stops a
  * compromised or buggy extractor from handing us `javascript:` payloads that
  * the web app would later render into an anchor.
  */
@@ -89,7 +89,7 @@ export function normalizePoints(value: unknown): number | null {
 
 /**
  * Coerce an arbitrary value onto a closed vocabulary.
- * Anything unrecognized becomes the supplied fallback — we never invent a
+ * Anything unrecognized becomes the supplied fallback -- we never invent a
  * new enum member from untrusted input.
  */
 export function normalizeEnum<T extends string>(

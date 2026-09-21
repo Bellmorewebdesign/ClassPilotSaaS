@@ -15,12 +15,16 @@
     "build:extension": "pnpm --filter @classpilot/shared build && pnpm --filter @classpilot/extension build",
     "typecheck": "pnpm --filter @classpilot/shared build && pnpm -r typecheck",
     "test": "pnpm --filter @classpilot/shared build && pnpm -r test",
-    "lint": "pnpm -r lint",
+    "lint": "eslint .",
     "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@eslint/js": "^9.19.0",
+    "eslint": "^9.19.0",
+    "globals": "^15.14.0",
+    "typescript-eslint": "^8.23.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
