@@ -23,10 +23,10 @@ export function ErrorState({
           </p>
         </div>
         <Link
-          href="/#connection"
+          href="/integrations"
           className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline underline-offset-4"
         >
-          Review connection
+          Check integrations
         </Link>
         <details className="border-t pt-3">
           <summary className="text-xs text-muted-foreground">
@@ -69,7 +69,7 @@ export function EmptyState({
             <span>03 &nbsp; Sync your classes</span>
           </div>
         ) : null}
-        <Link href="/#sync-setup" className="action-link">
+        <Link href="/integrations" className="action-link">
           Set up Classroom sync{' '}
           <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
         </Link>
