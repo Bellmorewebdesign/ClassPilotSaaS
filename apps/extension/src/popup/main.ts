@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import type {
   ConnectionStatus,
   ExtensionState,
@@ -79,7 +80,7 @@ async function send(request: PopupRequest): Promise<PopupResponse> {
       error:
         error instanceof Error
           ? error.message
-          : 'The ClassPilot background worker is not responding.',
+          : `The ${brand.extensionName} background worker is not responding.`,
     };
   }
 }
@@ -114,7 +115,7 @@ const PHASE_LABELS: Record<SyncProgress['phase'], string> = {
   discovering_classes: 'Finding your classes…',
   discovering_classwork: 'Reading Classwork pages…',
   reading_assignments: 'Reading assignments…',
-  uploading: 'Saving to ClassPilot…',
+  uploading: `Saving to ${brand.shortName}…`,
   complete: 'Sync complete',
   failed: 'Sync failed',
 };

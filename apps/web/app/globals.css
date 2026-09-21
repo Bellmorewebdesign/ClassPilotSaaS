@@ -2,54 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 199 89% 48%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 199 89% 48%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 199 89% 48%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 199 89% 48%;
-  }
-}
-
+/* All colors come from brandCssVariables() in @classpilot/shared.
+   The existing Tailwind semantic token names remain stable. */
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  h1 {
+    line-height: 1.2;
+  }
+  p {
+    overflow-wrap: anywhere;
+  }
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :is(a, button, input, textarea, select, summary):focus-visible {
+    outline: 2px solid var(--brand-action);
+    outline-offset: 4px;
+  }
+  ::selection {
+    background: var(--brand-pale);
+    color: var(--brand-ink);
+  }
+  summary {
+    cursor: pointer;
+  }
+  code {
+    overflow-wrap: anywhere;
+  }
+}
+@layer components {
+  .page-heading {
+    @apply text-3xl font-semibold tracking-[-0.04em] sm:text-4xl;
+  }
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.14em] text-primary;
+  }
+  .action-link {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90;
+  }
+  .quiet-link {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-input bg-card px-5 py-3 text-sm font-semibold transition-colors hover:bg-secondary;
+  }
+  .skip-link {
+    @apply fixed left-4 top-4 z-50 -translate-y-24 rounded-xl bg-primary px-5 py-3 text-primary-foreground focus:translate-y-0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
   }
 }

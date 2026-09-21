@@ -1,182 +1,360 @@
 import Link from 'next/link';
+import {
+  ArrowUpRight,
+  CalendarDays,
+  CircleAlert,
+  PanelsTopLeft,
+} from 'lucide-react';
+import { brand } from '@classpilot/shared';
+import type { AssignmentDto, PaginatedDto } from '@classpilot/shared';
 import { api } from '@/lib/api';
+import type { ApiResult } from '@/lib/api';
 import { AssignmentRow } from '@/components/assignment-row';
+import { AssistantCard } from '@/components/assistant-card';
 import { EmptyState, ErrorState } from '@/components/states';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { formatDateTime, formatRelative } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Dashboard.
- *
- * Answers the four questions a student actually has when they open this:
- * how many classes do I have, what is due soon, what changed in the last
- * sync, and is the extension still working?
- */
 export default async function DashboardPage() {
-  const [classes, dueSoon, recent, status] = await Promise.all([
+  const now = new Date();
+  const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const [classes, upcoming, missing, recent, status] = await Promise.all([
     api.classes(),
-    api.assignments({ dueAfter: new Date().toISOString(), sort: 'dueAt', order: 'asc', limit: 10 }),
-    api.assignments({ sort: 'lastSyncedAt', order: 'desc', limit: 8 }),
+    api.assignments({
+      dueAfter: now.toISOString(),
+      dueBefore: weekEnd.toISOString(),
+      sort: 'dueAt',
+      order: 'asc',
+      limit: 6,
+    }),
+    api.assignments({
+      status: 'missing',
+      sort: 'dueAt',
+      order: 'asc',
+      limit: 4,
+    }),
+    api.assignments({ sort: 'lastSyncedAt', order: 'desc', limit: 4 }),
     api.syncStatus(),
   ]);
 
-  if (!classes.ok) {
-    return <ErrorState title="Could not load your dashboard" message={classes.message} />;
-  }
-
-  const totalClasses = classes.data.total;
+  if (!classes.ok)
+    return (
+      <ErrorState
+        title="Could not load your workspace"
+        message={classes.message}
+      />
+    );
   const lastSync = status.ok ? status.data.lastSync : null;
   const activeSync = status.ok ? status.data.activeSync : null;
-  const totalAssignments = status.ok ? status.data.totals.assignments : 0;
-
-  if (totalClasses === 0) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <EmptyState
-          title="No classes synced yet"
-          message="Once you run your first sync from the ClassPilot extension, your classes and assignments will appear here."
-          showSetup
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        {activeSync ? <Badge variant="secondary">Sync in progress&hellip;</Badge> : null}
-      </div>
-
-      {/* --- Summary tiles --- */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Classes" value={totalClasses} href="/classes" />
-        <StatCard label="Assignments" value={totalAssignments} href="/assignments" />
-        <StatCard
-          label="Due in the next 7 days"
-          value={dueSoon.ok ? dueSoon.data.items.filter(withinSevenDays).length : 0}
-        />
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Last Classroom sync</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {lastSync ? (
-              <>
-                <p className="text-sm font-medium">
-                  {formatDateTime(lastSync.finishedAt ?? lastSync.startedAt) ?? 'unknown'}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {formatRelative(lastSync.finishedAt ?? lastSync.startedAt)}
-                  {lastSync.status === 'completed_with_warnings'
-                    ? ' · completed with warnings'
-                    : ''}
-                  {lastSync.status === 'failed' ? ' · failed' : ''}
-                </p>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">Never</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* --- Extension connection --- */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Extension connection</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1.5 text-sm text-muted-foreground">
-          {lastSync ? (
-            <>
-              <p>
-                Last sync reported {lastSync.classesSeen} classes and{' '}
-                {lastSync.assignmentsSeen} assignments &mdash;{' '}
-                {lastSync.assignmentsCreated} new, {lastSync.assignmentsUpdated} updated,{' '}
-                {lastSync.assignmentsUnchanged} unchanged.
-              </p>
-              {lastSync.clientVersion ? (
-                <p className="text-xs">Extension version {lastSync.clientVersion}</p>
-              ) : null}
-              {lastSync.warnings.length > 0 ? (
-                <details className="pt-2">
-                  <summary className="cursor-pointer text-xs text-foreground">
-                    {lastSync.warnings.length}{' '}
-                    {lastSync.warnings.length === 1 ? 'item' : 'items'} could not be read
-                  </summary>
-                  <ul className="mt-2 space-y-1.5 border-l-2 border-border pl-3 text-xs">
-                    {lastSync.warnings.map((warning, index) => (
-                      <li key={`${warning.code}-${index}`}>{warning.message}</li>
-                    ))}
-                  </ul>
-                </details>
-              ) : null}
-            </>
-          ) : (
-            <p>No sync has run yet. Open the ClassPilot extension and click Sync Classroom.</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* --- Due soon --- */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Due soon</h2>
-          <Link href="/assignments" className="text-sm text-accent underline underline-offset-4">
-            All assignments
-          </Link>
-        </div>
-        {dueSoon.ok && dueSoon.data.items.length > 0 ? (
-          <div className="space-y-2">
-            {dueSoon.data.items.map((assignment) => (
-              <AssignmentRow key={assignment.id} assignment={assignment} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Nothing with an upcoming due date. Classroom may not show due dates for
-            everything.
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-2">Your overview</p>
+          <h1 className="page-heading">Know what&apos;s next.</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Your coursework, with a little more clarity.
           </p>
-        )}
-      </section>
-
-      {/* --- Recently synced --- */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Recently synced</h2>
-        {recent.ok && recent.data.items.length > 0 ? (
-          <div className="space-y-2">
-            {recent.data.items.map((assignment) => (
-              <AssignmentRow key={assignment.id} assignment={assignment} />
-            ))}
-          </div>
+        </div>
+        {activeSync ? (
+          <Badge variant="secondary">Sync in progress…</Badge>
         ) : (
-          <p className="text-sm text-muted-foreground">Nothing synced yet.</p>
+          <Link href="/#sync-setup" className="quiet-link">
+            Sync setup <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
         )}
-      </section>
+      </div>
+      {classes.data.total === 0 ? (
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
+          <EmptyState
+            title="Your classes will feel at home here."
+            message={`Connect Classroom with ${brand.extensionName} to start seeing your coursework. Your classes and assignments will appear after your first sync.`}
+            showSetup
+          />
+          <AssistantCard />
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard
+              label="Due in the next 7 days"
+              value={upcoming.ok ? upcoming.data.total : null}
+              detail="Across all synced statuses"
+              icon={<CalendarDays className="h-5 w-5" />}
+            />
+            <StatCard
+              label="Marked missing"
+              value={missing.ok ? missing.data.total : null}
+              detail="As reported by Classroom"
+              icon={<CircleAlert className="h-5 w-5" />}
+            />
+            <StatCard
+              label="Your classes"
+              value={classes.data.total}
+              detail="Together in your workspace"
+              href="/classes"
+              icon={<PanelsTopLeft className="h-5 w-5" />}
+            />
+          </div>
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
+            <div className="min-w-0 space-y-7">
+              {!missing.ok || missing.data.total > 0 ? (
+                <CourseworkSection
+                  title="Needs your attention"
+                  result={missing}
+                  empty="No coursework marked missing."
+                />
+              ) : null}
+              <CourseworkSection
+                title="Upcoming"
+                result={upcoming}
+                empty="No upcoming deadlines in your synced coursework for the next 7 days."
+              />
+              <section className="space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-lg font-semibold">Your classes</h2>
+                  <Link
+                    href="/classes"
+                    className="text-xs font-semibold text-primary underline underline-offset-4"
+                  >
+                    View all
+                  </Link>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {classes.data.items.slice(0, 4).map((klass) => (
+                    <Link
+                      key={klass.id}
+                      href={`/classes/${klass.id}`}
+                      className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40"
+                    >
+                      <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
+                        <PanelsTopLeft className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                      <h3 className="break-words text-sm font-semibold">
+                        {klass.name}
+                      </h3>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {klass.assignmentCount}{' '}
+                        {klass.assignmentCount === 1 ? 'item' : 'items'} synced
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+              <details className="rounded-2xl border bg-card p-5">
+                <summary className="text-sm font-semibold">
+                  Recently synced coursework
+                </summary>
+                <div className="mt-4">
+                  <CourseworkSection
+                    title="Recently synced"
+                    result={recent}
+                    empty="No coursework has been synced yet."
+                  />
+                </div>
+              </details>
+            </div>
+            <div className="space-y-6">
+              <AssistantCard />
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Classroom sync</CardTitle>
+                  <CardDescription>
+                    A snapshot from your own session.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {!status.ok ? (
+                    <p className="text-muted-foreground">
+                      Sync status is unavailable.{' '}
+                      <Link
+                        href="/#connection"
+                        className="text-primary underline"
+                      >
+                        Review connection
+                      </Link>
+                      .
+                    </p>
+                  ) : lastSync ? (
+                    <>
+                      <Badge
+                        variant={
+                          lastSync.status === 'failed'
+                            ? 'destructive'
+                            : lastSync.status === 'completed_with_warnings'
+                              ? 'warning'
+                              : lastSync.status === 'completed'
+                                ? 'success'
+                                : 'secondary'
+                        }
+                      >
+                        {lastSync.status === 'failed'
+                          ? 'Last sync failed'
+                          : lastSync.status === 'completed_with_warnings'
+                            ? 'Synced with warnings'
+                            : lastSync.status === 'completed'
+                              ? 'Sync completed'
+                              : 'Sync in progress'}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        Last run:{' '}
+                        {formatDateTime(
+                          lastSync.finishedAt ?? lastSync.startedAt,
+                        ) ?? 'Time unavailable'}
+                        <br />
+                        {formatRelative(
+                          lastSync.finishedAt ?? lastSync.startedAt,
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {status.data.totals.assignments} assignments stored.
+                      </p>
+                      <details className="border-t pt-3">
+                        <summary className="text-xs text-muted-foreground">
+                          Sync details
+                          {lastSync.warnings.length
+                            ? ` · ${lastSync.warnings.length} warnings`
+                            : ''}
+                        </summary>
+                        <div className="mt-3 space-y-2 text-xs leading-relaxed text-muted-foreground">
+                          <p>
+                            Last run reported {lastSync.classesSeen} classes and{' '}
+                            {lastSync.assignmentsSeen} assignments:{' '}
+                            {lastSync.assignmentsCreated} new,{' '}
+                            {lastSync.assignmentsUpdated} updated,{' '}
+                            {lastSync.assignmentsUnchanged} unchanged.
+                          </p>
+                          {lastSync.clientVersion ? (
+                            <p>Extension version {lastSync.clientVersion}</p>
+                          ) : null}
+                          <ul className="space-y-2">
+                            {lastSync.warnings.map((warning, i) => (
+                              <li key={`${warning.code}-${i}`}>
+                                {warning.message}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </details>
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No sync has run yet. Open {brand.extensionName} and choose
+                      Sync Classroom.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-function withinSevenDays(assignment: { dueAt: string | null }): boolean {
-  if (!assignment.dueAt) return false;
-  const diff = new Date(assignment.dueAt).getTime() - Date.now();
-  return diff >= 0 && diff <= 7 * 24 * 60 * 60 * 1000;
+function CourseworkSection({
+  title,
+  result,
+  empty,
+}: {
+  title: string;
+  result: ApiResult<PaginatedDto<AssignmentDto>>;
+  empty: string;
+}) {
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <Link
+          href="/assignments"
+          className="text-xs font-semibold text-primary underline underline-offset-4"
+        >
+          All assignments
+        </Link>
+      </div>
+      {!result.ok ? (
+        <ErrorState
+          title={`Could not load ${title.toLowerCase()}`}
+          message={result.message}
+        />
+      ) : result.data.items.length ? (
+        <>
+          <div className="space-y-3">
+            {result.data.items.map((assignment) => (
+              <AssignmentRow key={assignment.id} assignment={assignment} />
+            ))}
+          </div>
+          {result.data.total > result.data.items.length ? (
+            <p className="text-xs text-muted-foreground">
+              Showing {result.data.items.length} of {result.data.total}. Open
+              all assignments to see more.
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <div className="rounded-2xl border bg-card p-7">
+          <p className="text-sm font-medium">{empty}</p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            This reflects your last sync. Some coursework may not show a due
+            date.
+          </p>
+        </div>
+      )}
+    </section>
+  );
 }
 
-function StatCard({ label, value, href }: { label: string; value: number; href?: string }) {
-  const body = (
-    <Card className={href ? 'transition-colors hover:bg-secondary/60' : undefined}>
-      <CardHeader className="pb-2">
-        <CardDescription>{label}</CardDescription>
+function StatCard({
+  label,
+  value,
+  detail,
+  href,
+  icon,
+}: {
+  label: string;
+  value: number | null;
+  detail: string;
+  href?: string;
+  icon: React.ReactNode;
+}) {
+  const content = (
+    <Card
+      className={href ? 'transition-colors hover:border-primary/40' : undefined}
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <CardDescription>{label}</CardDescription>
+          <span className="text-primary" aria-hidden="true">
+            {icon}
+          </span>
+        </div>
       </CardHeader>
       <CardContent>
-        <p className="text-3xl font-semibold tabular-nums">{value}</p>
+        <p className="text-4xl font-semibold tabular-nums tracking-tight">
+          {value ?? '—'}
+        </p>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          {value === null ? 'Could not load this count' : detail}
+        </p>
       </CardContent>
     </Card>
   );
-  return href ? <Link href={href}>{body}</Link> : body;
+  return href ? (
+    <Link href={href} className="rounded-2xl">
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }

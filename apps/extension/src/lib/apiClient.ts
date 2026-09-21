@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import type {
   MeDto,
   SyncClassroomBatchRequest,
@@ -38,17 +39,17 @@ export class ApiClientError extends Error {
   get userMessage(): string {
     switch (this.kind) {
       case 'unconfigured':
-        return 'ClassPilot is not connected yet. Open Settings and paste your API token.';
+        return `${brand.shortName} is not connected yet. Open Settings and paste your API token.`;
       case 'unauthorized':
-        return 'ClassPilot rejected this token. Check the token in Settings.';
+        return `${brand.shortName} rejected this token. Check the token in Settings.`;
       case 'unreachable':
-        return 'Could not reach ClassPilot. Is the API running at the configured URL?';
+        return `Could not reach ${brand.shortName}. Is the API running at the configured URL?`;
       case 'rate_limited':
-        return 'ClassPilot is rate limiting this client. Wait a moment and try again.';
+        return `${brand.shortName} is rate limiting this client. Wait a moment and try again.`;
       case 'server_error':
-        return 'ClassPilot had a server error. Check the API logs.';
+        return `${brand.shortName} had a server error. Check the API logs.`;
       case 'bad_request':
-        return `ClassPilot rejected the data: ${this.message}`;
+        return `${brand.shortName} rejected the data: ${this.message}`;
     }
   }
 }

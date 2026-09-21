@@ -24,19 +24,26 @@ export function AssignmentRow({
   showClass?: boolean;
 }) {
   const due = formatDateTime(assignment.dueAt);
-  const overdue = isOverdue(assignment.dueAt) && assignment.status !== 'submitted';
+  const overdue =
+    isOverdue(assignment.dueAt) &&
+    assignment.status !== 'submitted' &&
+    assignment.status !== 'returned';
   const soon = isDueSoon(assignment.dueAt);
 
   return (
     <Link
       href={`/assignments/${assignment.id}`}
-      className="block rounded-lg border border-border p-4 transition-colors hover:bg-secondary/60"
+      className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-secondary/30"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <p className="truncate font-medium">{assignment.title}</p>
+          <p className="break-words text-sm font-semibold">
+            {assignment.title}
+          </p>
           <p className="text-xs text-muted-foreground">
-            {showClass && assignment.className ? `${assignment.className} · ` : ''}
+            {showClass && assignment.className
+              ? `${assignment.className} · `
+              : ''}
             {formatType(assignment.assignmentType)}
             {assignment.topic ? ` · ${assignment.topic}` : ''}
           </p>
@@ -53,7 +60,11 @@ export function AssignmentRow({
             <Badge variant="secondary">{assignment.grade.raw}</Badge>
           ) : null}
 
-          <Badge variant={assignment.status === 'missing' ? 'destructive' : 'outline'}>
+          <Badge
+            variant={
+              assignment.status === 'missing' ? 'destructive' : 'outline'
+            }
+          >
             {formatStatus(assignment.status)}
           </Badge>
         </div>

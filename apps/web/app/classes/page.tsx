@@ -1,8 +1,15 @@
+import { brand } from '@classpilot/shared';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { EmptyState, ErrorState } from '@/components/states';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { NOT_CAPTURED, formatRelative } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
@@ -11,16 +18,21 @@ export default async function ClassesPage() {
   const classes = await api.classes();
 
   if (!classes.ok) {
-    return <ErrorState title="Could not load your classes" message={classes.message} />;
+    return (
+      <ErrorState
+        title="Could not load your classes"
+        message={classes.message}
+      />
+    );
   }
 
   if (classes.data.items.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Classes</h1>
+        <h1 className="page-heading">Classes</h1>
         <EmptyState
           title="No classes synced yet"
-          message="Run a sync from the ClassPilot extension and your enrolled classes will show up here."
+          message={`Run a sync with ${brand.extensionName} and your enrolled classes will appear here.`}
           showSetup
         />
       </div>
@@ -29,8 +41,8 @@ export default async function ClassesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Classes</h1>
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <h1 className="page-heading">Classes</h1>
         <p className="text-sm text-muted-foreground">
           {classes.data.total} {classes.data.total === 1 ? 'class' : 'classes'}
         </p>
@@ -38,12 +50,15 @@ export default async function ClassesPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {classes.data.items.map((klass) => (
-          <Card key={klass.id} className="flex flex-col">
+          <Card key={klass.id} className="flex min-w-0 flex-col">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <CardTitle className="truncate text-base">
-                    <Link href={`/classes/${klass.id}`} className="hover:underline">
+                  <CardTitle className="break-words text-base leading-snug">
+                    <Link
+                      href={`/classes/${klass.id}`}
+                      className="hover:underline"
+                    >
                       {klass.name}
                     </Link>
                   </CardTitle>

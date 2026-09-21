@@ -1,20 +1,41 @@
 import Link from 'next/link';
+import { brand } from '@classpilot/shared';
+import { ArrowUpRight, CircleAlert } from 'lucide-react';
+import { BrandMark } from '@/components/brand-logo';
 import { Card, CardContent } from '@/components/ui/card';
 
-/**
- * Shared empty and error states.
- *
- * A dashboard with nothing in it is the DEFAULT experience before the first
- * sync, so these are first-class screens, not afterthoughts. Each one says
- * what happened and what to do next.
- */
-
-export function ErrorState({ title, message }: { title: string; message: string }) {
+export function ErrorState({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
   return (
-    <Card className="border-destructive/40">
-      <CardContent className="space-y-2 pt-6">
-        <p className="font-medium text-destructive">{title}</p>
-        <p className="text-sm text-muted-foreground">{message}</p>
+    <Card className="border-destructive/30">
+      <CardContent className="space-y-4 pt-6">
+        <CircleAlert className="h-7 w-7 text-destructive" aria-hidden="true" />
+        <div>
+          <h2 className="font-semibold">{title}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your coursework could not be loaded. Check the connection and try
+            again.
+          </p>
+        </div>
+        <Link
+          href="/#connection"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-primary underline underline-offset-4"
+        >
+          Review connection
+        </Link>
+        <details className="border-t pt-3">
+          <summary className="text-xs text-muted-foreground">
+            Connection details
+          </summary>
+          <p className="mt-3 break-words text-xs leading-relaxed text-muted-foreground">
+            {message}
+          </p>
+        </details>
       </CardContent>
     </Card>
   );
@@ -31,35 +52,26 @@ export function EmptyState({
 }) {
   return (
     <Card>
-      <CardContent className="space-y-4 pt-6">
-        <div className="space-y-1.5">
-          <p className="font-medium">{title}</p>
-          <p className="text-sm text-muted-foreground">{message}</p>
+      <CardContent className="space-y-5 px-6 py-9 sm:px-8">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary">
+          <BrandMark className="h-12 w-12" />
         </div>
-
+        <div className="max-w-lg space-y-2">
+          <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {message}
+          </p>
+        </div>
         {showSetup ? (
-          <ol className="list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
-            <li>
-              Load the extension: <code className="text-xs">chrome://extensions</code>{' '}
-              &rarr; Developer mode &rarr; Load unpacked &rarr;{' '}
-              <code className="text-xs">apps/extension/dist</code>
-            </li>
-            <li>
-              Open the ClassPilot popup &rarr; Settings, and paste your{' '}
-              <code className="text-xs">DEV_EXTENSION_TOKEN</code>
-            </li>
-            <li>Sign in to Google Classroom in this browser</li>
-            <li>
-              Click <strong>Sync Classroom</strong>
-            </li>
-          </ol>
+          <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs text-muted-foreground">
+            <span>01 &nbsp; Set up {brand.extensionName}</span>
+            <span>02 &nbsp; Open Classroom</span>
+            <span>03 &nbsp; Sync your classes</span>
+          </div>
         ) : null}
-
-        <Link
-          href="/"
-          className="inline-block text-sm text-accent underline underline-offset-4"
-        >
-          Setup instructions
+        <Link href="/#sync-setup" className="action-link">
+          Set up Classroom sync{' '}
+          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </CardContent>
     </Card>

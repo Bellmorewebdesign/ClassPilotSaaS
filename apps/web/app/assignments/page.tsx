@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import { api } from '@/lib/api';
 import { AssignmentRow } from '@/components/assignment-row';
 import { EmptyState, ErrorState } from '@/components/states';
@@ -8,16 +9,21 @@ export default async function AssignmentsPage() {
   const assignments = await api.assignments({ sort: 'dueAt', order: 'asc' });
 
   if (!assignments.ok) {
-    return <ErrorState title="Could not load assignments" message={assignments.message} />;
+    return (
+      <ErrorState
+        title="Could not load assignments"
+        message={assignments.message}
+      />
+    );
   }
 
   if (assignments.data.items.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Assignments</h1>
+        <h1 className="page-heading">Assignments</h1>
         <EmptyState
           title="No assignments synced yet"
-          message="Run a sync from the ClassPilot extension to pull in your classwork."
+          message={`Run a sync with ${brand.extensionName} to bring in your coursework.`}
           showSetup
         />
       </div>
@@ -31,9 +37,11 @@ export default async function AssignmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Assignments</h1>
-        <p className="text-sm text-muted-foreground">{assignments.data.total} total</p>
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <h1 className="page-heading">Assignments</h1>
+        <p className="text-sm text-muted-foreground">
+          {assignments.data.total} total
+        </p>
       </div>
 
       <div className="space-y-2">

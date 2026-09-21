@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import {
   CLASSROOM_ORIGIN,
   classworkUrl,
@@ -117,7 +118,7 @@ export async function runSync(deps: SyncEngineDeps): Promise<SyncSummary> {
     for (const rejection of result.rejected) {
       warnings.push({
         code: rejection.reason,
-        message: `ClassPilot could not store one ${rejection.kind}: ${humanizeReason(rejection.reason)}`,
+        message: `${brand.shortName} could not store one ${rejection.kind}: ${humanizeReason(rejection.reason)}`,
         url: rejection.url,
       });
     }
@@ -137,7 +138,7 @@ export async function runSync(deps: SyncEngineDeps): Promise<SyncSummary> {
     if (!homeResponse.ok || homeResponse.type !== 'HOME') {
       throw new SyncAbortedError(
         'home_unreadable',
-        'ClassPilot could not read your Classroom home page.',
+        `${brand.shortName} could not read your Classroom home page.`,
       );
     }
 

@@ -2,6 +2,12 @@ import { cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as esbuild from 'esbuild';
+import {
+  brand,
+  brandCssVariables,
+  brandMarkup,
+  brandMarkSvg,
+} from '../../packages/shared/dist/brand.js';
 
 /**
  * ClassPilot extension build.
@@ -39,7 +45,9 @@ const shared = {
   logLevel: 'info',
   // The extension has no build-time secrets. This is asserted, not assumed:
   // see assertNoSecrets below.
-  define: { 'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development') },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development'),
+  },
 };
 
 /** @type {esbuild.BuildOptions[]} */
@@ -67,6 +75,16 @@ const targets = [
 
 async function copyStatic() {
   await cp(publicDir, outDir, { recursive: true });
+  const popup = await readFile(join(publicDir, 'popup.html'), 'utf8');
+  await writeFile(join(outDir, 'popup.html'), brandMarkup(popup));
+  const css = Object.entries(brandCssVariables())
+    .map(([key, value]) => `  ${key}: ${value};`)
+    .join('\n');
+  await writeFile(join(outDir, 'brand.css'), `:root {\n${css}\n}\n`);
+  await writeFile(join(outDir, 'brand-mark.svg'), brandMarkSvg());
+  await cp(join(root, '../../packages/shared/assets'), join(outDir, 'fonts'), {
+    recursive: true,
+  });
 }
 
 /**
@@ -104,10 +122,11 @@ async function syncManifestVersion() {
   const manifestPath = join(outDir, 'manifest.json');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 
-  if (manifest.version !== pkg.version) {
-    manifest.version = pkg.version;
-    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-  }
+  manifest.version = pkg.version;
+  manifest.name = brand.extensionName;
+  manifest.description = brand.extensionDescription;
+  manifest.action.default_title = brand.extensionName;
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 /**
@@ -149,10 +168,14 @@ async function build() {
   await copyStatic();
 
   if (watch) {
-    const contexts = await Promise.all(targets.map((target) => esbuild.context(target)));
+    const contexts = await Promise.all(
+      targets.map((target) => esbuild.context(target)),
+    );
     await Promise.all(contexts.map((context) => context.watch()));
     await syncManifestVersion();
-    console.log('[classpilot] watching for changes; reload the extension in chrome://extensions after each rebuild');
+    console.log(
+      '[classpilot] watching for changes; reload the extension in chrome://extensions after each rebuild',
+    );
     return;
   }
 
@@ -162,7 +185,9 @@ async function build() {
   await assertBundleBudget();
 
   console.log(`[classpilot] extension built into ${outDir}`);
-  console.log('[classpilot] load it via chrome://extensions -> Developer mode -> Load unpacked');
+  console.log(
+    '[classpilot] load it via chrome://extensions -> Developer mode -> Load unpacked',
+  );
 }
 
 build().catch((error) => {

@@ -1,3 +1,5 @@
+import { brand } from '@classpilot/shared';
+import { AssistantCard } from '@/components/assistant-card';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -34,12 +36,20 @@ export default async function AssignmentDetailPage({
 
   if (!assignment.ok) {
     if (assignment.kind === 'error') notFound();
-    return <ErrorState title="Could not load this assignment" message={assignment.message} />;
+    return (
+      <ErrorState
+        title="Could not load this assignment"
+        message={assignment.message}
+      />
+    );
   }
 
   const item = assignment.data;
   const due = formatDateTime(item.dueAt);
-  const overdue = isOverdue(item.dueAt) && item.status !== 'submitted';
+  const overdue =
+    isOverdue(item.dueAt) &&
+    item.status !== 'submitted' &&
+    item.status !== 'returned';
 
   return (
     <div className="space-y-6">
@@ -53,7 +63,9 @@ export default async function AssignmentDetailPage({
         <h1 className="text-2xl font-semibold tracking-tight">{item.title}</h1>
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <Badge variant="outline">{formatType(item.assignmentType)}</Badge>
-          <Badge variant={item.status === 'missing' ? 'destructive' : 'secondary'}>
+          <Badge
+            variant={item.status === 'missing' ? 'destructive' : 'secondary'}
+          >
             {formatStatus(item.status)}
           </Badge>
           {item.topic ? <Badge variant="outline">{item.topic}</Badge> : null}
@@ -71,7 +83,9 @@ export default async function AssignmentDetailPage({
           />
           <Fact
             label="Points"
-            value={item.pointsPossible !== null ? `${item.pointsPossible}` : null}
+            value={
+              item.pointsPossible !== null ? `${item.pointsPossible}` : null
+            }
           />
           <Fact label="Class" value={item.className} />
           <Fact label="Topic" value={item.topic} />
@@ -101,7 +115,8 @@ export default async function AssignmentDetailPage({
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No instructions were found on this assignment&rsquo;s Classroom page.
+              No instructions were found on this assignment&rsquo;s Classroom
+              page.
             </p>
           )}
         </CardContent>
@@ -146,8 +161,8 @@ export default async function AssignmentDetailPage({
             </ul>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            ClassPilot records an attachment&rsquo;s name, link and type. It does not open
-            or read the file.
+            {brand.shortName} records an attachment&rsquo;s name, link and type.
+            It does not open or read the file.
           </p>
         </CardContent>
       </Card>
@@ -159,12 +174,18 @@ export default async function AssignmentDetailPage({
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <dl className="space-y-1.5">
-            <SourceRow label="First seen" value={formatDateTime(item.firstSeenAt)} />
-            <SourceRow label="Last seen" value={formatDateTime(item.lastSeenAt)} />
+            <SourceRow
+              label="First seen"
+              value={formatDateTime(item.firstSeenAt)}
+            />
+            <SourceRow
+              label="Last seen"
+              value={formatDateTime(item.lastSeenAt)}
+            />
             <SourceRow
               label="Due date read as"
               value={item.dueLabel}
-              hint="The literal text ClassPilot read from Classroom."
+              hint={`The literal text ${brand.shortName} read from Classroom.`}
             />
           </dl>
           {item.canonicalUrl ? (
@@ -180,18 +201,7 @@ export default async function AssignmentDetailPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="pt-6">
-          <button
-            type="button"
-            disabled
-            className="w-full cursor-not-allowed rounded-md border border-dashed border-border px-4 py-3 text-left text-sm text-muted-foreground"
-          >
-            Ask ClassPilot about this assignment&hellip;
-            <span className="ml-2 text-xs">(not enabled yet)</span>
-          </button>
-        </CardContent>
-      </Card>
+      <AssistantCard />
     </div>
   );
 }
@@ -209,7 +219,9 @@ function Fact({
 }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
       <p
         className={
           value

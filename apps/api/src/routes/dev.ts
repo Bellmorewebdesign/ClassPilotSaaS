@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import type { FastifyInstance } from 'fastify';
 import type { AppEnv } from '../config/env.js';
 import { ApiError } from '../lib/errors.js';
@@ -49,7 +50,7 @@ export async function registerDevRoutes(
           }
         : { configured: false, lastFourChars: null, lastUsedAt: null },
       instructions:
-        'Copy DEV_EXTENSION_TOKEN from your .env file into the ClassPilot extension popup. The API never returns the token itself.',
+        `Copy DEV_EXTENSION_TOKEN from your .env file into the ${brand.extensionName} popup. The API never returns the token itself.`,
     };
   });
 }
