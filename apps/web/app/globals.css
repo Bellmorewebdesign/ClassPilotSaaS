@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* All colors come from brandCssVariables() in @classpilot/shared.
-   The existing Tailwind semantic token names remain stable. */
+/* Every colour, radius, duration and easing comes from brandCssVariables()
+   in @classpilot/shared. This file composes those tokens into reusable
+   surfaces; it must not introduce new literal values. */
+
 @layer base {
   * {
     @apply border-border;
@@ -17,7 +19,7 @@
     text-wrap: balance;
   }
   h1 {
-    line-height: 1.2;
+    line-height: 1.08;
   }
   p {
     overflow-wrap: anywhere;
@@ -32,11 +34,20 @@
   }
   :is(a, button, input, textarea, select, summary):focus-visible {
     outline: 2px solid var(--brand-action);
-    outline-offset: 4px;
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+  /* On the dark marketing surface the light-mode focus ring disappears. */
+  .on-depth :is(a, button, input, textarea, select, summary):focus-visible {
+    outline-color: var(--depth-glow);
   }
   ::selection {
     background: var(--brand-pale);
     color: var(--brand-ink);
+  }
+  .on-depth ::selection {
+    background: var(--depth-glow);
+    color: var(--depth-base);
   }
   summary {
     cursor: pointer;
@@ -45,29 +56,309 @@
     overflow-wrap: anywhere;
   }
 }
+
 @layer components {
+  /* ---------------------------------------------------------------------
+     Typography
+     --------------------------------------------------------------------- */
   .page-heading {
     @apply text-3xl font-semibold tracking-[-0.04em] sm:text-4xl;
+  }
+  .display-heading {
+    @apply text-[2rem] font-semibold leading-[1.06] tracking-[-0.04em] xs:text-[2.375rem] sm:text-[3.25rem] sm:leading-[1.04] sm:tracking-[-0.045em] lg:text-[4rem] xl:text-[4.25rem];
   }
   .eyebrow {
     @apply text-[11px] font-bold uppercase tracking-[0.14em] text-primary;
   }
+  .on-depth .eyebrow {
+    @apply text-depth-glow;
+  }
+
+  /* ---------------------------------------------------------------------
+     Buttons
+     --------------------------------------------------------------------- */
   .action-link {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-low transition-[transform,box-shadow,background-color] duration-fast ease-out hover:-translate-y-px hover:bg-primary/90 hover:shadow-mid active:translate-y-0 active:duration-instant;
   }
   .quiet-link {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-input bg-card px-5 py-3 text-sm font-semibold transition-colors hover:bg-secondary;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-input bg-card px-5 py-3 text-sm font-semibold transition-[transform,background-color,border-color] duration-fast ease-out hover:-translate-y-px hover:bg-secondary active:translate-y-0;
   }
+  /* Dark-surface variants. */
+  .on-depth .quiet-link {
+    @apply border-depth-line bg-white/[0.04] text-depth-ink hover:border-depth-line-strong hover:bg-white/[0.08];
+  }
+
   .skip-link {
-    @apply fixed left-4 top-4 z-50 -translate-y-24 rounded-xl bg-primary px-5 py-3 text-primary-foreground focus:translate-y-0;
+    @apply fixed left-4 top-4 z-[60] -translate-y-24 rounded-xl bg-primary px-5 py-3 text-primary-foreground transition-transform duration-fast ease-out focus:translate-y-0;
+  }
+
+  /* ---------------------------------------------------------------------
+     Glass surfaces
+
+     The discipline here: glass is a LAYER, never a background for body
+     text. Each surface carries its own fill so it stays legible even where
+     what is behind it is busy, and blur stays modest because heavy blur is
+     both expensive and muddy.
+     --------------------------------------------------------------------- */
+  .glass {
+    background: var(--glass-light);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-low);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .glass {
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+  }
+
+  .glass-dark {
+    position: relative;
+    background: var(--glass-dark);
+    border: 1px solid var(--depth-line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-high);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .glass-dark {
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    }
+  }
+  /* The refractive top edge. One hairline, not a rainbow. */
+  .glass-dark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding-top: 1px;
+    background: linear-gradient(
+      to bottom,
+      var(--glass-sheen),
+      transparent 42%
+    );
+    pointer-events: none;
+  }
+
+  /* ---------------------------------------------------------------------
+     Depth (marketing / auth) surface
+     --------------------------------------------------------------------- */
+  .on-depth {
+    background: var(--depth-base);
+    color: var(--depth-ink);
+  }
+
+  /* Ambient light behind the hero. Two soft radial washes, no blobs, no
+     rainbow - just enough to stop the dark surface reading as flat black. */
+  .depth-ambient {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .depth-ambient::before,
+  .depth-ambient::after {
+    content: '';
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(80px);
+    will-change: transform;
+  }
+  .depth-ambient::before {
+    width: 46rem;
+    height: 46rem;
+    top: -18rem;
+    left: 50%;
+    margin-left: -23rem;
+    background: radial-gradient(
+      circle,
+      rgba(127, 178, 240, 0.22),
+      transparent 68%
+    );
+    animation: drift 18s var(--ease-inOut) infinite;
+  }
+  .depth-ambient::after {
+    width: 34rem;
+    height: 34rem;
+    bottom: -14rem;
+    right: -8rem;
+    background: radial-gradient(
+      circle,
+      rgba(159, 199, 243, 0.14),
+      transparent 70%
+    );
+    animation: drift 22s var(--ease-inOut) infinite reverse;
+  }
+
+  /* A single hairline rule that fades at both ends. Used between sections. */
+  .hairline {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--depth-line),
+      transparent
+    );
+  }
+
+  /* ---------------------------------------------------------------------
+     Scroll-reveal
+
+     Elements start slightly low and transparent, and are released by an
+     IntersectionObserver adding [data-visible]. If JavaScript never runs,
+     the .no-js fallback below keeps everything visible - content is never
+     hidden behind a script.
+     --------------------------------------------------------------------- */
+  .reveal {
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      transform var(--duration-slow) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  /* Scoped to html.js: with scripts off the class is never added, so the
+     content is simply visible rather than stuck at opacity 0 forever. */
+  .js .reveal {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    will-change: transform, opacity;
+  }
+  .js .reveal[data-visible='true'] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* ---------------------------------------------------------------------
+     The Coursen mark drawing itself
+
+     Used by the entrance animation and the hero. The dash length is the
+     measured length of the mark path; hardcoding it avoids a getTotalLength()
+     call and a layout read on every mount.
+     --------------------------------------------------------------------- */
+  .mark-trace {
+    /* Measured length of brand.mark.path: a 268.83deg arc at r=21 is 98.53
+       units. Rounded up to 99 so the stroke starts fully hidden. Hardcoded
+       rather than read via getTotalLength() to avoid a layout read on every
+       mount; packages/shared/src/brand.test.ts pins the path so this cannot
+       silently go stale. */
+    --trace-length: 99;
+    stroke-dasharray: var(--trace-length);
+    stroke-dashoffset: var(--trace-length);
+    animation: trace var(--duration-deliberate) var(--ease-out) forwards;
+  }
+  .mark-dot {
+    opacity: 0;
+    transform-origin: center;
+    animation: scale-in var(--duration-base) var(--ease-spring) forwards;
+    animation-delay: var(--duration-deliberate);
+  }
+
+  /* ---------------------------------------------------------------------
+     Hero connector packet
+
+     A dot travelling from the Classroom lane (12.5% across) into the Coursen
+     core (50% across), i.e. 37.5% of the container width.
+
+     The dot sits inside a full-width track and the TRACK is what animates: a
+     percentage translate resolves against the animated element's own size, so
+     translating the 6px dot by 37.5% would move it 2px. Translating a
+     full-width track by 37.5% moves it 37.5% of the container. Transform
+     only - no layout, stays on the compositor.
+     --------------------------------------------------------------------- */
+  .packet-track {
+    position: absolute;
+    inset: 0;
+    animation: packet-travel 1.5s var(--ease-inOut) infinite;
+    will-change: transform, opacity;
+  }
+  .packet-dot {
+    position: absolute;
+    left: 12.5%;
+    top: 0;
+    height: 6px;
+    width: 6px;
+    margin-left: -3px;
+    border-radius: 9999px;
+    background: var(--depth-glow);
+    box-shadow: 0 0 12px 2px rgba(127, 178, 240, 0.6);
+  }
+  @keyframes packet-travel {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 0, 0);
+    }
+    15% {
+      opacity: 1;
+    }
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(37.5%, 42px, 0);
+    }
+  }
+
+  /* The hero demo's arriving card is hidden until the sequence reaches it.
+     With scripts off the sequence never runs, so settle it rather than
+     leaving a gap in the list. */
+  html:not(.js) [data-demo-pending='true'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------------------------------------------------------------------
+     Interactive card lift
+     --------------------------------------------------------------------- */
+  .lift {
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
+    will-change: transform;
+  }
+  .lift:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: var(--shadow-mid);
   }
 }
+
+@layer utilities {
+  /* Stagger helper: set a per-item delay without inventing a class each time. */
+  .delay-step-1 {
+    --reveal-delay: 70ms;
+  }
+  .delay-step-2 {
+    --reveal-delay: 140ms;
+  }
+  .delay-step-3 {
+    --reveal-delay: 210ms;
+  }
+  .delay-step-4 {
+    --reveal-delay: 280ms;
+  }
+  .delay-step-5 {
+    --reveal-delay: 350ms;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   Reduced motion
+
+   Everything still ARRIVES - nothing stays invisible - it just arrives
+   without travelling. Scroll-reveal elements are forced visible so content
+   can never be trapped behind a disabled transition.
+   ----------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation: none !important;
-    transition: none !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .js .reveal,
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

@@ -69,13 +69,13 @@ export default async function DashboardPage() {
         {activeSync ? (
           <Badge variant="secondary">Sync in progress…</Badge>
         ) : (
-          <Link href="/#sync-setup" className="quiet-link">
+          <Link href="/integrations" className="quiet-link">
             Sync setup <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         )}
       </div>
       {classes.data.total === 0 ? (
-        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
+        <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
           <EmptyState
             title="Your classes will feel at home here."
             message={`Connect Classroom with ${brand.extensionName} to start seeing your coursework. Your classes and assignments will appear after your first sync.`}
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
               icon={<PanelsTopLeft className="h-5 w-5" />}
             />
           </div>
-          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
+          <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
             <div className="min-w-0 space-y-7">
               {!missing.ok || missing.data.total > 0 ? (
                 <CourseworkSection
@@ -164,7 +164,7 @@ export default async function DashboardPage() {
                 </div>
               </details>
             </div>
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <AssistantCard />
               <Card>
                 <CardHeader>
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
                     <p className="text-muted-foreground">
                       Sync status is unavailable.{' '}
                       <Link
-                        href="/#connection"
+                        href="/integrations"
                         className="text-primary underline"
                       >
                         Review connection
