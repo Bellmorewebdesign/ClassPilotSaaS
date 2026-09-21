@@ -1,0 +1,418 @@
+{
+  "syncId": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+  "startedAt": "2026-09-20T19:00:00.000Z",
+  "classes": [
+    {
+      "sourceId": "Njk5MjMxMjM",
+      "canonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+      "name": "AP Calculus AB",
+      "section": "Period 3",
+      "teacherName": "Miguel Rivera",
+      "room": null,
+      "description": null,
+      "extraction": {
+        "extractor": "classroomHome.card",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+        "provenance": [
+          {
+            "field": "name",
+            "strategy": "anchor-accessible-name",
+            "found": true
+          },
+          {
+            "field": "teacherName",
+            "strategy": "avatar-alt-text",
+            "found": true
+          },
+          {
+            "field": "section",
+            "strategy": "card-secondary-line",
+            "found": true
+          }
+        ],
+        "warnings": [],
+        "durationMs": 2
+      }
+    },
+    {
+      "sourceId": "ODcyMTQ1Njc",
+      "canonicalUrl": "https://classroom.google.com/c/ODcyMTQ1Njc",
+      "name": "English Literature",
+      "section": "Section B",
+      "teacherName": "Dana Okafor",
+      "room": null,
+      "description": null,
+      "extraction": {
+        "extractor": "classroomHome.card",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/ODcyMTQ1Njc",
+        "provenance": [
+          {
+            "field": "name",
+            "strategy": "anchor-accessible-name",
+            "found": true
+          },
+          {
+            "field": "teacherName",
+            "strategy": "avatar-alt-text",
+            "found": true
+          },
+          {
+            "field": "section",
+            "strategy": "card-secondary-line",
+            "found": true
+          }
+        ],
+        "warnings": [],
+        "durationMs": 1
+      }
+    },
+    {
+      "sourceId": "MTExMjIyMzM",
+      "canonicalUrl": "https://classroom.google.com/c/MTExMjIyMzM",
+      "name": "Chemistry Honors",
+      "section": null,
+      "teacherName": null,
+      "room": null,
+      "description": null,
+      "extraction": {
+        "extractor": "classroomHome.card",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/MTExMjIyMzM",
+        "provenance": [
+          {
+            "field": "name",
+            "strategy": "anchor-accessible-name",
+            "found": true
+          },
+          {
+            "field": "teacherName",
+            "strategy": "card-name-shaped-line",
+            "found": false
+          },
+          {
+            "field": "section",
+            "strategy": "card-secondary-line",
+            "found": false
+          }
+        ],
+        "warnings": [],
+        "durationMs": 0
+      }
+    },
+    {
+      "sourceId": "Njk5MjMxMjM",
+      "canonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+      "name": "AP Calculus AB",
+      "section": "Period 3",
+      "teacherName": "Miguel Rivera",
+      "room": "204",
+      "description": "A year-long course covering limits, derivatives, integrals and the fundamental theorem of calculus, preparing students for the AP exam in May.",
+      "extraction": {
+        "extractor": "classPage",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+        "provenance": [
+          {
+            "field": "name",
+            "strategy": "banner-heading",
+            "found": true
+          },
+          {
+            "field": "section",
+            "strategy": "second-heading",
+            "found": true
+          },
+          {
+            "field": "teacherName",
+            "strategy": "teacher-avatar-alt",
+            "found": true
+          },
+          {
+            "field": "room",
+            "strategy": "room-label",
+            "found": true
+          },
+          {
+            "field": "description",
+            "strategy": "about-section-prose",
+            "found": true
+          }
+        ],
+        "warnings": [],
+        "durationMs": 2
+      }
+    }
+  ],
+  "assignments": [
+    {
+      "sourceId": "NTQzMjE5OA",
+      "canonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM/a/NTQzMjE5OA/details",
+      "classSourceId": "Njk5MjMxMjM",
+      "classCanonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+      "title": "Limits Worksheet",
+      "instructions": "Complete problems 1 through 20 in the attached worksheet. Show all of your work for each limit, including any algebraic simplification. Answers without supporting work will not receive credit.",
+      "assignmentType": "assignment",
+      "topic": "Unit 1: Limits",
+      "dueAtIso": "2026-09-24T23:59:00.000Z",
+      "dueLabel": "Due Sep 24, 11:59 PM",
+      "pointsPossible": 100,
+      "status": "assigned",
+      "grade": null,
+      "attachments": [
+        {
+          "name": "Limits Worksheet.pdf",
+          "url": "https://drive.google.com/file/d/1abcdefg/view",
+          "mimeType": "application/pdf",
+          "provider": "google_drive",
+          "attachmentType": "pdf"
+        },
+        {
+          "name": "Limits Review Slides",
+          "url": "https://docs.google.com/presentation/d/1xyz/edit",
+          "mimeType": "application/vnd.google-apps.presentation",
+          "provider": "google_slides",
+          "attachmentType": "google_slides"
+        },
+        {
+          "name": "Intro to Limits",
+          "url": "https://www.youtube.com/watch?v=abc123",
+          "mimeType": null,
+          "provider": "youtube",
+          "attachmentType": "youtube"
+        },
+        {
+          "name": "Extra Practice",
+          "url": "https://example.edu/handouts/limits.pdf",
+          "mimeType": "application/pdf",
+          "provider": "external",
+          "attachmentType": "pdf"
+        }
+      ],
+      "extraction": {
+        "extractor": "assignmentPage",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/Njk5MjMxMjM/a/NTQzMjE5OA/details",
+        "provenance": [
+          {
+            "field": "title",
+            "strategy": "main-first-heading",
+            "found": true
+          },
+          {
+            "field": "dueLabel",
+            "strategy": "aria-label-due",
+            "found": true
+          },
+          {
+            "field": "dueAt",
+            "strategy": "parsed-from-dueLabel",
+            "found": true
+          },
+          {
+            "field": "attachments",
+            "strategy": "main-region-external-links",
+            "found": true
+          },
+          {
+            "field": "instructions",
+            "strategy": "longest-prose-block",
+            "found": true
+          },
+          {
+            "field": "assignmentType",
+            "strategy": "url:/a/",
+            "found": true
+          },
+          {
+            "field": "topic",
+            "strategy": "breadcrumb-secondary-heading",
+            "found": true
+          },
+          {
+            "field": "pointsPossible",
+            "strategy": "text-n-points",
+            "found": true
+          },
+          {
+            "field": "status",
+            "strategy": "text-assigned",
+            "found": true
+          },
+          {
+            "field": "grade",
+            "strategy": "unresolved",
+            "found": false
+          }
+        ],
+        "warnings": [],
+        "durationMs": 4
+      }
+    },
+    {
+      "sourceId": "MjIyMjIyMg",
+      "canonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM/a/MjIyMjIyMg/details",
+      "classSourceId": "Njk5MjMxMjM",
+      "classCanonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+      "title": "Derivatives Quiz",
+      "instructions": "Closed book quiz covering the power rule, the product rule and the quotient rule. You may use a calculator for arithmetic only.",
+      "assignmentType": "quiz",
+      "topic": "Unit 2: Derivatives",
+      "dueAtIso": "2026-09-18T23:59:00.000Z",
+      "dueLabel": "Due Sep 18, 11:59 PM Returned 92/100",
+      "pointsPossible": 100,
+      "status": "returned",
+      "grade": {
+        "raw": "92/100",
+        "earned": 92,
+        "possible": 100
+      },
+      "attachments": [],
+      "extraction": {
+        "extractor": "assignmentPage",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/Njk5MjMxMjM/a/MjIyMjIyMg/details",
+        "provenance": [
+          {
+            "field": "title",
+            "strategy": "main-first-heading",
+            "found": true
+          },
+          {
+            "field": "dueLabel",
+            "strategy": "text-due-line",
+            "found": true
+          },
+          {
+            "field": "dueAt",
+            "strategy": "parsed-from-dueLabel",
+            "found": true
+          },
+          {
+            "field": "attachments",
+            "strategy": "main-region-external-links",
+            "found": false
+          },
+          {
+            "field": "instructions",
+            "strategy": "longest-prose-block",
+            "found": true
+          },
+          {
+            "field": "assignmentType",
+            "strategy": "text-quiz",
+            "found": true
+          },
+          {
+            "field": "topic",
+            "strategy": "breadcrumb-secondary-heading",
+            "found": true
+          },
+          {
+            "field": "pointsPossible",
+            "strategy": "text-n-points",
+            "found": true
+          },
+          {
+            "field": "status",
+            "strategy": "text-returned",
+            "found": true
+          },
+          {
+            "field": "grade",
+            "strategy": "text-fraction",
+            "found": true
+          }
+        ],
+        "warnings": [],
+        "durationMs": 1
+      }
+    },
+    {
+      "sourceId": "MTExMTExMQ",
+      "canonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM/a/MTExMTExMQ/details",
+      "classSourceId": "Njk5MjMxMjM",
+      "classCanonicalUrl": "https://classroom.google.com/c/Njk5MjMxMjM",
+      "title": "Chapter 4 Reading",
+      "instructions": null,
+      "assignmentType": "assignment",
+      "topic": null,
+      "dueAtIso": null,
+      "dueLabel": "No due date",
+      "pointsPossible": null,
+      "status": "unknown",
+      "grade": null,
+      "attachments": [],
+      "extraction": {
+        "extractor": "assignmentPage",
+        "version": "1.0.0",
+        "pageUrl": "https://classroom.google.com/c/Njk5MjMxMjM/a/MTExMTExMQ/details",
+        "provenance": [
+          {
+            "field": "title",
+            "strategy": "main-first-heading",
+            "found": true
+          },
+          {
+            "field": "dueLabel",
+            "strategy": "text-due-line",
+            "found": true
+          },
+          {
+            "field": "dueAt",
+            "strategy": "unparseable-or-absent",
+            "found": false
+          },
+          {
+            "field": "attachments",
+            "strategy": "main-region-external-links",
+            "found": false
+          },
+          {
+            "field": "instructions",
+            "strategy": null,
+            "found": false
+          },
+          {
+            "field": "assignmentType",
+            "strategy": "url:/a/",
+            "found": true
+          },
+          {
+            "field": "topic",
+            "strategy": null,
+            "found": false
+          },
+          {
+            "field": "pointsPossible",
+            "strategy": null,
+            "found": false
+          },
+          {
+            "field": "status",
+            "strategy": "unresolved",
+            "found": false
+          },
+          {
+            "field": "grade",
+            "strategy": "unresolved",
+            "found": false
+          }
+        ],
+        "warnings": [],
+        "durationMs": 1
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "code": "assignment_load_failed",
+      "message": "One assignment page did not load: Timed out waiting for the page to load.",
+      "url": "https://classroom.google.com/c/Njk5MjMxMjM/a/OTk5OTk5OQ/details"
+    }
+  ],
+  "clientVersion": "0.1.0",
+  "batchIndex": 0,
+  "final": true
+}

@@ -1,0 +1,94 @@
+# ---------------------------------------------------------------------------
+# ClassPilot local stack
+#
+#   docker compose up -d --build
+#
+# There is deliberately NO mongo service here. ClassPilot uses MongoDB Atlas,
+# set via MONGODB_URI in .env, so that local development and the eventual AWS
+# deployment talk to the same kind of database. Running Mongo locally would
+# hide connection-string, TLS and IP-allow-list problems until deploy day.
+#
+# If you do want a throwaway local Mongo, see the `mongo-local` profile at the
+# bottom -- it is opt-in and off by default.
+# ---------------------------------------------------------------------------
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: classpilot/api:local
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      # Containers must bind every interface; 127.0.0.1 would be unreachable
+      # from outside the container.
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      LOG_PRETTY: "false"
+      # The browser talks to the web app on the host, so CORS is expressed in
+      # host terms, not container terms.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    image: classpilot/web:local
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      # Server-to-server inside the compose network, so this is the SERVICE
+      # name, not localhost.
+      CLASSPILOT_API_URL: http://api:4000
+      # Shown in the browser, so this one is in host terms.
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # --- optional: a throwaway local MongoDB ---------------------------------
+  # Enable with:  docker compose --profile mongo-local up -d
+  # Then set:     MONGODB_URI=mongodb://mongo:27017  in .env
+  mongo:
+    profiles: ["mongo-local"]
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # --- optional: expose the stack over a Cloudflare Tunnel -----------------
+  # Enable with:  docker compose --profile tunnel up -d
+  # Requires CLOUDFLARE_TUNNEL_TOKEN in .env. See docker/cloudflare-tunnel.md.
+  # No router ports are opened: cloudflared dials out.
+  cloudflared:
+    profiles: ["tunnel"]
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - api
+      - web
+
+volumes:
+  mongo-data:

@@ -21,6 +21,9 @@ export default tseslint.config(
       '**/*.config.js',
       '**/*.config.mjs',
       '**/next-env.d.ts',
+      // The web app has its own Next-specific config (.eslintrc.json) with
+      // React and accessibility rules this flat config does not carry.
+      'apps/web/**',
     ],
   },
 

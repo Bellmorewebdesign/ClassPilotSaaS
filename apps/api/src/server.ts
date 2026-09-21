@@ -38,7 +38,6 @@ export async function buildServer(
     // Trust the proxy when running behind Cloudflare Tunnel / a load balancer,
     // so rate limiting sees the real client IP instead of the proxy's.
     trustProxy: true,
-    disableRequestLogging: false,
   });
 
   // --- Security headers --------------------------------------------------

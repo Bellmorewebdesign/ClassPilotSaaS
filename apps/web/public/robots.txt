@@ -1,0 +1,3 @@
+# ClassPilot is a private dashboard for a single user's own coursework.
+User-agent: *
+Disallow: /

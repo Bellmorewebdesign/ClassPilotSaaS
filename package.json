@@ -15,7 +15,7 @@
     "build:extension": "pnpm --filter @classpilot/shared build && pnpm --filter @classpilot/extension build",
     "typecheck": "pnpm --filter @classpilot/shared build && pnpm -r typecheck",
     "test": "pnpm --filter @classpilot/shared build && pnpm -r test",
-    "lint": "eslint .",
+    "lint": "eslint . && pnpm --filter @classpilot/web lint",
     "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache"
   },
   "devDependencies": {
@@ -28,7 +28,8 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "sharp"
     ]
   }
 }
