@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ClassPilot</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <h1>ClassPilot</h1>
+      </div>
+      <button
+        type="button"
+        id="settings-toggle"
+        class="icon-button"
+        aria-expanded="false"
+        aria-controls="settings-panel"
+      >
+        Settings
+      </button>
+    </header>
+
+    <main id="main-panel">
+      <!-- Connection + Classroom detection -->
+      <ul class="status-list" id="status-list">
+        <li class="status" id="status-classroom">
+          <span class="dot" data-state="pending" aria-hidden="true"></span>
+          <span class="status-text">Checking for Classroom&hellip;</span>
+        </li>
+        <li class="status" id="status-connection">
+          <span class="dot" data-state="pending" aria-hidden="true"></span>
+          <span class="status-text">Checking ClassPilot&hellip;</span>
+        </li>
+      </ul>
+
+      <p class="last-sync" id="last-sync">No sync yet.</p>
+
+      <!-- Live progress, shown only while syncing -->
+      <section class="progress" id="progress" hidden aria-live="polite">
+        <p class="progress-phase" id="progress-phase">Syncing Classroom&hellip;</p>
+
+        <div class="progress-row">
+          <span class="progress-label">Classes</span>
+          <span class="progress-count" id="progress-classes">0 / 0</span>
+        </div>
+        <div class="bar"><div class="bar-fill" id="bar-classes"></div></div>
+
+        <div class="progress-row">
+          <span class="progress-label">Assignments</span>
+          <span class="progress-count" id="progress-assignments">0 / 0</span>
+        </div>
+        <div class="bar"><div class="bar-fill" id="bar-assignments"></div></div>
+
+        <p class="progress-current" id="progress-current"></p>
+      </section>
+
+      <!-- Result of the last sync -->
+      <section class="result" id="result" hidden>
+        <p class="result-title" id="result-title"></p>
+        <ul class="result-stats" id="result-stats"></ul>
+        <button type="button" id="warnings-toggle" class="link-button" hidden>
+          View details
+        </button>
+        <ul class="warnings" id="warnings" hidden></ul>
+      </section>
+
+      <!-- Errors -->
+      <section class="error" id="error" hidden role="alert">
+        <p id="error-message"></p>
+      </section>
+
+      <div class="actions">
+        <button type="button" id="sync-button" class="primary">Sync Classroom</button>
+        <button type="button" id="cancel-button" class="secondary" hidden>Cancel</button>
+        <button type="button" id="open-app" class="secondary">Open ClassPilot</button>
+      </div>
+    </main>
+
+    <!-- Settings -->
+    <section id="settings-panel" class="settings" hidden>
+      <label class="field">
+        <span class="field-label">ClassPilot API URL</span>
+        <input
+          type="url"
+          id="api-url"
+          placeholder="http://localhost:4000"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </label>
+
+      <label class="field">
+        <span class="field-label">API token</span>
+        <input
+          type="password"
+          id="api-token"
+          placeholder="Paste your DEV_EXTENSION_TOKEN"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="field-hint" id="token-hint"></span>
+      </label>
+
+      <p class="field-hint">
+        The token is stored only in this browser profile and is never included
+        in the extension's code.
+      </p>
+
+      <div class="actions">
+        <button type="button" id="save-settings" class="primary">Save &amp; test</button>
+      </div>
+
+      <hr />
+
+      <details class="debug">
+        <summary>Scraper diagnostics</summary>
+        <p class="field-hint">
+          Reports the structure of the Classroom page you are currently on -
+          tag names, roles, counts, and which extraction strategies match.
+          It contains no schoolwork.
+        </p>
+        <label class="checkbox">
+          <input type="checkbox" id="include-text" />
+          <span>Include text samples (local debugging only - do not share)</span>
+        </label>
+        <div class="actions">
+          <button type="button" id="capture-diagnostics" class="secondary">
+            Capture diagnostics
+          </button>
+        </div>
+        <textarea id="diagnostics-output" readonly hidden rows="10"></textarea>
+        <button type="button" id="copy-diagnostics" class="link-button" hidden>
+          Copy to clipboard
+        </button>
+      </details>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

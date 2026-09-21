@@ -47,8 +47,13 @@ export interface ExtractionReport {
 export interface AttachmentCandidate {
   /** Display name of the attachment as Classroom labelled it. */
   name: string | null;
-  /** Absolute URL. Required in practice — an attachment with no URL is dropped. */
-  url: string | null;
+  /**
+   * Absolute URL. Non-nullable on purpose: an attachment we cannot link to is
+   * useless, so extractors drop a chip whose href does not resolve rather
+   * than emitting one with a null URL. This matches the wire schema, where
+   * `url` is the one required field on an attachment.
+   */
+  url: string;
   mimeType: string | null;
   provider: AttachmentProvider;
   attachmentType: AttachmentType;

@@ -1,0 +1,63 @@
+<!doctype html>
+<!--
+  SYNTHETIC FIXTURE - not captured from Google Classroom. See README.md.
+  Represents: https://classroom.google.com/w/Njk5MjMxMjM/t/all
+  Structural signals reproduced:
+    - coursework items link to /c/<courseId>/a/<workId>/details
+    - a material links to /c/<courseId>/m/<workId>/details
+    - items are role="listitem" grouped under role="region" topic sections
+    - inline due labels and item-type icon aria-labels
+-->
+<html lang="en">
+  <head><title>Classwork</title></head>
+  <body>
+    <nav role="navigation"><a href="/h">Classes</a></nav>
+
+    <main role="main">
+      <section role="region">
+        <h2>Unit 1: Limits</h2>
+        <div role="list">
+
+          <div role="listitem">
+            <span aria-label="Assignment"></span>
+            <a href="/c/Njk5MjMxMjM/a/NTQzMjE5OA/details" aria-label="Limits Worksheet">
+              Limits Worksheet
+            </a>
+            <div>Due Sep 24, 11:59 PM</div>
+          </div>
+
+          <div role="listitem">
+            <span aria-label="Quiz assignment"></span>
+            <a href="/c/Njk5MjMxMjM/a/NzY1NDMyMQ/details" aria-label="Limits Quiz">
+              Limits Quiz
+            </a>
+            <div>Due Sep 26</div>
+          </div>
+
+          <div role="listitem">
+            <span aria-label="Material"></span>
+            <a href="/c/Njk5MjMxMjM/m/MTIzNDU2Nw/details" aria-label="Reference Sheet">
+              Reference Sheet
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+      <section role="region">
+        <h2>Unit 2: Derivatives</h2>
+        <div role="list">
+          <div role="listitem">
+            <span aria-label="Assignment"></span>
+            <a href="/u/0/c/Njk5MjMxMjM/a/ODg4ODg4OA/details" aria-label="Power Rule Practice">
+              Power Rule Practice
+            </a>
+            <div>No due date</div>
+          </div>
+          <!-- Duplicate link to the same item; must be deduped by workId. -->
+          <a href="/c/Njk5MjMxMjM/a/ODg4ODg4OA/details">View details</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

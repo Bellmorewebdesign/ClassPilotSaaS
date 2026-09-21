@@ -1,0 +1,50 @@
+<!doctype html>
+<!--
+  SYNTHETIC FIXTURE - not captured from Google Classroom. See README.md.
+  Represents: the signed-in class list at https://classroom.google.com/h
+  Structural signals reproduced:
+    - each class card links to /c/<courseId>
+    - cards are role="listitem" inside a role="list"
+    - the card link carries the class name as its accessible name
+    - a secondary line holds the section, an avatar alt holds the teacher
+    - a duplicate "Classwork" shortcut link per card (must be deduped)
+-->
+<html lang="en">
+  <head><title>Classes</title></head>
+  <body>
+    <nav role="navigation" aria-label="Main menu">
+      <a href="/h">Classes</a>
+      <a href="https://accounts.google.com/SignOutOptions">Account</a>
+    </nav>
+
+    <main role="main">
+      <div role="list" aria-label="Classes">
+
+        <div role="listitem">
+          <a href="/c/Njk5MjMxMjM" aria-label="AP Calculus AB">
+            <span>AP Calculus AB</span>
+          </a>
+          <div>Period 3</div>
+          <img alt="Miguel Rivera" src="/avatar1.png" />
+          <a href="/c/Njk5MjMxMjM/t/all" aria-label="Classwork">Classwork</a>
+        </div>
+
+        <div role="listitem">
+          <a href="/u/0/c/ODcyMTQ1Njc" aria-label="English Literature">
+            <span>English Literature</span>
+          </a>
+          <div>Section B</div>
+          <img alt="Dana Okafor" src="/avatar2.png" />
+        </div>
+
+        <div role="listitem">
+          <a href="/c/MTExMjIyMzM" aria-label="Chemistry Honors">
+            <span>Chemistry Honors</span>
+          </a>
+          <img alt="Chemistry Honors" src="/banner.png" />
+        </div>
+
+      </div>
+    </main>
+  </body>
+</html>
