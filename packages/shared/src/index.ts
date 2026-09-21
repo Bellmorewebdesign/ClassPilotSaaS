@@ -20,3 +20,4 @@ export * from './sync/schemas.js';
 export * from './sync/hash.js';
 
 export * from './api/types.js';
+export * from './brand.js';

@@ -1,11 +1,11 @@
-# ClassPilot
+# Coursen AI
 
 An AI workspace for students. **V1 proves one thing:** a Chrome extension can
-sync Google Classroom into the ClassPilot backend using the browser session
+sync Google Classroom into the Coursen AI backend using the browser session
 the student is *already* signed into — no school password, no Classroom
 OAuth, no admin permissions.
 
-> **Scope note.** There is no AI in V1. The "Ask ClassPilot" buttons are
+> **Scope note.** There is no AI in V1. The "Ask Coursen" buttons are
 > visible but disabled placeholders.
 
 ---
@@ -16,7 +16,7 @@ OAuth, no admin permissions.
                          YOUR BROWSER
   ┌──────────────────────────────────────────────────────────────┐
   │                                                              │
-  │   classroom.google.com          ClassPilot extension (MV3)   │
+  │   classroom.google.com          Coursen Sync extension (MV3)   │
   │   (your existing session)       ┌──────────────────────────┐ │
   │          ▲                      │ popup  ── Sync Classroom │ │
   │          │ reads pages you      │   │                      │ │
@@ -32,7 +32,7 @@ OAuth, no admin permissions.
                                         │ HTTPS + Bearer token
                                         ▼
                     ┌───────────────────────────────────┐
-                    │   ClassPilot API  (Fastify, :4000)│
+                    │   Coursen AI API  (Fastify, :4000)│
                     │  ─────────────────────────────────│
                     │   Zod validation (never trust the │
                     │     extension's output)           │
@@ -50,7 +50,7 @@ OAuth, no admin permissions.
                     └───────────────▲───────────────────┘
                                     │ read-only, server-side
                     ┌───────────────┴───────────────────┐
-                    │   ClassPilot web  (Next.js, :3000)│
+                    │   Coursen AI web  (Next.js, :3000)│
                     │   / · /dashboard · /classes ·     │
                     │   /classes/[id] · /assignments ·  │
                     │   /assignments/[id]               │
@@ -181,15 +181,15 @@ pnpm build:extension     # produces apps/extension/dist
 3. Click **Load unpacked**.
 4. Select **`apps/extension/dist`** — the `dist` folder, not the repo root.
 
-Pin ClassPilot to the toolbar so the popup is one click away.
+Pin Coursen Sync to the toolbar so the popup is one click away.
 
-After each rebuild, click the **reload** icon on the ClassPilot card in
+After each rebuild, click the **reload** icon on the Coursen Sync card in
 `chrome://extensions`.
 
 ### Connecting the extension to the backend
 
-1. Click the ClassPilot icon → **Settings**.
-2. **ClassPilot API URL**: `http://localhost:4000`
+1. Click the Coursen Sync icon → **Settings**.
+2. **Workspace API URL**: `http://localhost:4000`
 3. **API token**: paste your `DEV_EXTENSION_TOKEN` from `.env`.
 4. **Save & test** — it should report `Connected as dev@classpilot.local`.
 
@@ -199,7 +199,7 @@ profile and is **not** synced to your Google account.
 ### Running a sync
 
 1. Sign in to <https://classroom.google.com> in the same Chrome profile.
-2. Open the ClassPilot popup — it should say **Classroom detected ✓**.
+2. Open the Coursen Sync popup — it should say **Classroom detected ✓**.
 3. Click **Sync Classroom**.
 
 The sync opens **one inactive background tab** and walks it through your
@@ -264,7 +264,7 @@ contains **no schoolwork, class names or teacher names**, and a test asserts
 that.
 
 1. Open a real Classroom page (home, a Classwork page, an assignment).
-2. ClassPilot popup → **Settings** → **Scraper diagnostics** → **Capture
+2. Coursen Sync popup → **Settings** → **Scraper diagnostics** → **Capture
    diagnostics**.
 3. **Copy to clipboard** and share the JSON.
 
@@ -316,7 +316,7 @@ docker compose logs -f api
 docker compose down
 ```
 
-The compose file intentionally has **no MongoDB service**: ClassPilot uses
+The compose file intentionally has **no MongoDB service**: Coursen AI uses
 Atlas so that local development and the eventual AWS deployment talk to the
 same kind of database, rather than hiding connection-string, TLS and IP
 allow-list problems until deploy day. A throwaway local Mongo is available
@@ -360,10 +360,10 @@ security notes there before leaving a tunnel running.
 
 ## Security & privacy
 
-- **No Google password, ever.** ClassPilot has no login form for your school
+- **No Google password, ever.** Coursen AI has no login form for your school
   account and no OAuth flow. It reads pages your browser is already
   authorised to display.
-- **No admin bypass.** If Classroom will not show you something, ClassPilot
+- **No admin bypass.** If Classroom will not show you something, Coursen AI
   cannot see it either.
 - **No hardcoded secrets.** The extension build greps its own output and
   fails if a token-shaped string appears in the bundle.
@@ -408,3 +408,11 @@ so it can be replaced or scaled without coordination.
 AI assignment help · automatic submission · Google Classroom OAuth · Stripe ·
 subscriptions · production auth · AWS Lambda/queues · Drive deep ingestion ·
 Docs automation.
+
+## Brand configuration
+
+Public identity, colors, and the waypoint mark are centralized in
+[`packages/shared/src/brand.ts`](packages/shared/src/brand.ts). See
+[`docs/branding.md`](docs/branding.md) for rename, asset, and rebuild instructions.
+Internal `classpilot` package names, database names, environment variables,
+and extension storage keys deliberately remain stable.

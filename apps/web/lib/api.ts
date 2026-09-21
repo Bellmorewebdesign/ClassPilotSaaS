@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import type {
   AssignmentDto,
   ClassDto,
@@ -29,21 +30,28 @@ export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; kind: ApiFailure; message: string };
 
-export type ApiFailure = 'unconfigured' | 'unauthorized' | 'unreachable' | 'error';
+export type ApiFailure =
+  | 'unconfigured'
+  | 'unauthorized'
+  | 'unreachable'
+  | 'error';
 
 /** Human sentences for each failure, shown directly in the UI. */
 export const FAILURE_MESSAGES: Record<ApiFailure, string> = {
   unconfigured:
     'CLASSPILOT_API_TOKEN is not set. Copy your DEV_EXTENSION_TOKEN from .env into CLASSPILOT_API_TOKEN and restart the web app.',
-  unauthorized:
-    'The ClassPilot API rejected this token. Check that CLASSPILOT_API_TOKEN matches DEV_EXTENSION_TOKEN.',
-  unreachable: `Could not reach the ClassPilot API at ${API_URL}. Is it running?`,
-  error: 'The ClassPilot API returned an error. Check the API logs.',
+  unauthorized: `The ${brand.name} API rejected this token. Check that CLASSPILOT_API_TOKEN matches DEV_EXTENSION_TOKEN.`,
+  unreachable: `Could not reach the ${brand.name} API at ${API_URL}. Is it running?`,
+  error: `The ${brand.name} API returned an error. Check the API logs.`,
 };
 
 async function get<T>(path: string): Promise<ApiResult<T>> {
   if (API_TOKEN === '') {
-    return { ok: false, kind: 'unconfigured', message: FAILURE_MESSAGES.unconfigured };
+    return {
+      ok: false,
+      kind: 'unconfigured',
+      message: FAILURE_MESSAGES.unconfigured,
+    };
   }
 
   let response: Response;
@@ -55,11 +63,19 @@ async function get<T>(path: string): Promise<ApiResult<T>> {
       cache: 'no-store',
     });
   } catch {
-    return { ok: false, kind: 'unreachable', message: FAILURE_MESSAGES.unreachable };
+    return {
+      ok: false,
+      kind: 'unreachable',
+      message: FAILURE_MESSAGES.unreachable,
+    };
   }
 
   if (response.status === 401 || response.status === 403) {
-    return { ok: false, kind: 'unauthorized', message: FAILURE_MESSAGES.unauthorized };
+    return {
+      ok: false,
+      kind: 'unauthorized',
+      message: FAILURE_MESSAGES.unauthorized,
+    };
   }
   if (response.status === 404) {
     return { ok: false, kind: 'error', message: 'Not found.' };
@@ -85,22 +101,31 @@ export const api = {
 
   classes: () => get<PaginatedDto<ClassDto>>('/api/v1/classes?limit=200'),
 
-  classById: (id: string) => get<ClassDto>(`/api/v1/classes/${encodeURIComponent(id)}`),
+  classById: (id: string) =>
+    get<ClassDto>(`/api/v1/classes/${encodeURIComponent(id)}`),
 
-  assignments: (params: {
-    classId?: string;
-    dueAfter?: string;
-    sort?: 'dueAt' | 'lastSyncedAt' | 'title';
-    order?: 'asc' | 'desc';
-    limit?: number;
-  } = {}) => {
+  assignments: (
+    params: {
+      classId?: string;
+      dueAfter?: string;
+      dueBefore?: string;
+      status?: AssignmentDto['status'];
+      sort?: 'dueAt' | 'lastSyncedAt' | 'title';
+      order?: 'asc' | 'desc';
+      limit?: number;
+    } = {},
+  ) => {
     const query = new URLSearchParams();
     if (params.classId) query.set('classId', params.classId);
     if (params.dueAfter) query.set('dueAfter', params.dueAfter);
+    if (params.dueBefore) query.set('dueBefore', params.dueBefore);
+    if (params.status) query.set('status', params.status);
     query.set('sort', params.sort ?? 'dueAt');
     query.set('order', params.order ?? 'asc');
     query.set('limit', String(params.limit ?? 200));
-    return get<PaginatedDto<AssignmentDto>>(`/api/v1/assignments?${query.toString()}`);
+    return get<PaginatedDto<AssignmentDto>>(
+      `/api/v1/assignments?${query.toString()}`,
+    );
   },
 
   assignmentById: (id: string) =>

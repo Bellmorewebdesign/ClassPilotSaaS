@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import { isClassroomUrl } from '@classpilot/shared';
 import { ApiClient, ApiClientError } from '../lib/apiClient.js';
 import type {
@@ -134,7 +135,7 @@ async function startSync(): Promise<void> {
   if (settings.apiToken === '') {
     runtime.lastError = {
       code: 'unconfigured',
-      message: 'ClassPilot is not connected yet. Open Settings and paste your API token.',
+      message: `${brand.extensionName} is not connected yet. Open Settings and paste your API token.`,
     };
     await broadcast();
     return;

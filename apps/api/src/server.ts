@@ -1,3 +1,4 @@
+import { brand } from '@classpilot/shared';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
@@ -172,7 +173,7 @@ export async function buildServer(
     if (!matchedRoute || matchedRoute === '/health') return;
     if (!isDatabaseConnected()) {
       throw ApiError.serviceUnavailable(
-        'The ClassPilot database is unavailable. Please try again shortly.',
+        `The ${brand.name} database is unavailable. Please try again shortly.`,
       );
     }
   });

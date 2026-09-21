@@ -3,14 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ClassPilot</title>
+    <title>{{brand.extensionName}}</title>
+    <link rel="stylesheet" href="brand.css" />
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <header class="header">
       <div class="brand">
-        <span class="mark" aria-hidden="true"></span>
-        <h1>ClassPilot</h1>
+        <img class="mark" src="brand-mark.svg" alt="" width="36" height="36" />
+        <div>
+          <h1>{{brand.extensionName}}</h1>
+          <p class="brand-caption">Your coursework, connected.</p>
+        </div>
       </div>
       <button
         type="button"
@@ -32,7 +36,7 @@
         </li>
         <li class="status" id="status-connection">
           <span class="dot" data-state="pending" aria-hidden="true"></span>
-          <span class="status-text">Checking ClassPilot&hellip;</span>
+          <span class="status-text">Checking {{brand.shortName}}&hellip;</span>
         </li>
       </ul>
 
@@ -40,7 +44,9 @@
 
       <!-- Live progress, shown only while syncing -->
       <section class="progress" id="progress" hidden aria-live="polite">
-        <p class="progress-phase" id="progress-phase">Syncing Classroom&hellip;</p>
+        <p class="progress-phase" id="progress-phase">
+          Syncing Classroom&hellip;
+        </p>
 
         <div class="progress-row">
           <span class="progress-label">Classes</span>
@@ -73,16 +79,26 @@
       </section>
 
       <div class="actions">
-        <button type="button" id="sync-button" class="primary">Sync Classroom</button>
-        <button type="button" id="cancel-button" class="secondary" hidden>Cancel</button>
-        <button type="button" id="open-app" class="secondary">Open ClassPilot</button>
+        <button type="button" id="sync-button" class="primary">
+          Sync Classroom
+        </button>
+        <button type="button" id="cancel-button" class="secondary" hidden>
+          Cancel
+        </button>
+        <button type="button" id="open-app" class="secondary">
+          Open {{brand.shortName}}
+        </button>
       </div>
     </main>
 
     <!-- Settings -->
     <section id="settings-panel" class="settings" hidden>
+      <h2>Connect your workspace</h2>
+      <p class="settings-intro">
+        Development connection settings for {{brand.name}}.
+      </p>
       <label class="field">
-        <span class="field-label">ClassPilot API URL</span>
+        <span class="field-label">Workspace API URL</span>
         <input
           type="url"
           id="api-url"
@@ -110,7 +126,9 @@
       </p>
 
       <div class="actions">
-        <button type="button" id="save-settings" class="primary">Save &amp; test</button>
+        <button type="button" id="save-settings" class="primary">
+          Save &amp; test
+        </button>
       </div>
 
       <hr />
@@ -118,13 +136,15 @@
       <details class="debug">
         <summary>Scraper diagnostics</summary>
         <p class="field-hint">
-          Reports the structure of the Classroom page you are currently on -
-          tag names, roles, counts, and which extraction strategies match.
-          It contains no schoolwork.
+          Reports the structure of the Classroom page you are currently on - tag
+          names, roles, counts, and which extraction strategies match. It
+          contains no schoolwork.
         </p>
         <label class="checkbox">
           <input type="checkbox" id="include-text" />
-          <span>Include text samples (local debugging only - do not share)</span>
+          <span
+            >Include text samples (local debugging only - do not share)</span
+          >
         </label>
         <div class="actions">
           <button type="button" id="capture-diagnostics" class="secondary">
