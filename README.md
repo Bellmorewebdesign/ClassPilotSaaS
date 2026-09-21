@@ -117,6 +117,12 @@ pnpm install
 cp .env.example .env
 ```
 
+There is **one** `.env`, at the repository root. Both the API and the web app
+load it explicitly — they share values (the dev token in particular), and two
+files that have to be kept in sync is a bug waiting to happen. A real
+environment variable always overrides the file, which is what Docker and CI
+rely on.
+
 Edit `.env`:
 
 ```bash

@@ -1,4 +1,5 @@
 import { loadEnv } from './config/env.js';
+import { loadDotenvFromRepoRoot } from './config/loadDotenv.js';
 import { bootstrapDevUser } from './db/bootstrap.js';
 import { connectDatabase, disconnectDatabase } from './db/connect.js';
 import { createLogger } from './lib/logger.js';
@@ -12,6 +13,9 @@ import { buildServer } from './server.js';
  * half-starting and erroring on the first request.
  */
 async function main(): Promise<void> {
+  // Must run before loadEnv(), which reads process.env.
+  loadDotenvFromRepoRoot();
+
   const env = loadEnv();
   const logger = createLogger(env);
 
