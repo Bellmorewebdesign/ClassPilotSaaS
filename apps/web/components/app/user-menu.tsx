@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { signOutAction } from '@/app/(auth)/actions';
 
 /**
@@ -14,13 +14,13 @@ export function UserMenu({ email }: { email: string }) {
     <div className="flex items-center gap-2.5">
       <span
         aria-hidden="true"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-[13px] font-bold text-primary"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-label text-primary"
       >
         {initial}
       </span>
       <span className="hidden min-w-0 flex-1 lg:block">
-        <span className="block truncate text-[13px] font-medium">{email}</span>
-        <span className="block text-[11px] text-muted-foreground">
+        <span className="block truncate text-label text-foreground">{email}</span>
+        <span className="block text-metadata text-muted-foreground">
           Development workspace
         </span>
       </span>
@@ -31,7 +31,7 @@ export function UserMenu({ email }: { email: string }) {
           title="Sign out"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-fast hover:bg-secondary hover:text-foreground"
         >
-          <LogOut className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+          <CoursenIcon name="arrow" className="h-4 w-4" />
         </button>
       </form>
     </div>

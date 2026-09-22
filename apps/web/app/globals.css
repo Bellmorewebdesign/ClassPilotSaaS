@@ -7,6 +7,23 @@
    surfaces; it must not introduce new literal values. */
 
 @layer base {
+  /*
+   * The V2 responsive type step.
+   *
+   * The kit gives each role a desktop and a mobile size. Rather than every
+   * component carrying `text-3xl sm:text-5xl`, the ROLE variable itself
+   * changes below the breakpoint, so `text-display` is correct at any width
+   * and the hierarchy can never drift between components.
+   */
+  @media (max-width: 639px) {
+    :root {
+      --text-display: var(--text-display-mobile);
+      --text-h1: var(--text-h1-mobile);
+      --text-h2: var(--text-h2-mobile);
+      --text-h3: var(--text-h3-mobile);
+    }
+  }
+
   * {
     @apply border-border;
   }
@@ -39,14 +56,14 @@
   }
   /* On the dark marketing surface the light-mode focus ring disappears. */
   .on-depth :is(a, button, input, textarea, select, summary):focus-visible {
-    outline-color: var(--depth-glow);
+    outline-color: var(--depth-accent);
   }
   ::selection {
     background: var(--brand-pale);
     color: var(--brand-ink);
   }
   .on-depth ::selection {
-    background: var(--depth-glow);
+    background: var(--depth-accent);
     color: var(--depth-base);
   }
   summary {
@@ -61,31 +78,51 @@
   /* ---------------------------------------------------------------------
      Typography
      --------------------------------------------------------------------- */
-  .page-heading {
-    @apply text-3xl font-semibold tracking-[-0.04em] sm:text-4xl;
-  }
+  /* Kit roles. Components use these rather than picking sizes. */
   .display-heading {
-    @apply text-[2rem] font-semibold leading-[1.06] tracking-[-0.04em] xs:text-[2.375rem] sm:text-[3.25rem] sm:leading-[1.04] sm:tracking-[-0.045em] lg:text-[4rem] xl:text-[4.25rem];
+    @apply text-display;
   }
+  .page-heading {
+    @apply text-h1;
+  }
+  .section-heading {
+    @apply text-h2;
+  }
+  .card-heading {
+    @apply text-h3;
+  }
+  /* "Metadata" role, used for the small uppercase labels above headings. */
   .eyebrow {
-    @apply text-[11px] font-bold uppercase tracking-[0.14em] text-primary;
+    @apply text-metadata uppercase tracking-[0.12em] text-primary;
   }
   .on-depth .eyebrow {
-    @apply text-depth-glow;
+    @apply text-depth-accent;
   }
 
   /* ---------------------------------------------------------------------
      Buttons
      --------------------------------------------------------------------- */
+  /*
+   * Controls, per the kit component sheet: a solid action primary, an
+   * outlined secondary on Surface, and a Neutral-fill disabled state that
+   * says why rather than simply going grey.
+   *
+   * Hover uses the dedicated Action-hover role, not an opacity shift - the
+   * kit specifies an actual second colour, and opacity over a patterned
+   * ground does not reproduce it.
+   */
   .action-link {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-low transition-[transform,box-shadow,background-color] duration-fast ease-out hover:-translate-y-px hover:bg-primary/90 hover:shadow-mid active:translate-y-0 active:duration-instant;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-button text-primary-foreground transition-colors duration-fast ease-out hover:bg-action-hover;
   }
   .quiet-link {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-input bg-card px-5 py-3 text-sm font-semibold transition-[transform,background-color,border-color] duration-fast ease-out hover:-translate-y-px hover:bg-secondary active:translate-y-0;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-input bg-card px-5 text-button text-foreground transition-colors duration-fast ease-out hover:bg-secondary;
+  }
+  .disabled-link {
+    @apply inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-md bg-disabled-fill px-5 text-button text-disabled;
   }
   /* Dark-surface variants. */
   .on-depth .quiet-link {
-    @apply border-depth-line bg-white/[0.04] text-depth-ink hover:border-depth-line-strong hover:bg-white/[0.08];
+    @apply border-depth-line bg-white/[0.06] text-depth-ink hover:border-depth-line-strong hover:bg-white/[0.12];
   }
 
   .skip-link {
@@ -103,7 +140,7 @@
   .glass {
     background: var(--glass-light);
     border: 1px solid hsl(var(--border));
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-low);
   }
   @supports (backdrop-filter: blur(1px)) {
@@ -118,6 +155,13 @@
     border: 1px solid var(--depth-line);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-high);
+  }
+  /* A plain panel on the ink surface. Used where translucency would add
+     nothing - which, under V2, is most places. Brand before effect. */
+  .panel-dark {
+    background: var(--depth-raised);
+    border: 1px solid var(--depth-line);
+    border-radius: var(--radius-lg);
   }
   @supports (backdrop-filter: blur(1px)) {
     .glass-dark {
@@ -171,7 +215,7 @@
     margin-left: -23rem;
     background: radial-gradient(
       circle,
-      rgba(127, 178, 240, 0.22),
+      rgba(167, 201, 238, 0.20),
       transparent 68%
     );
     animation: drift 18s var(--ease-inOut) infinite;
@@ -183,7 +227,7 @@
     right: -8rem;
     background: radial-gradient(
       circle,
-      rgba(159, 199, 243, 0.14),
+      rgba(167, 201, 238, 0.12),
       transparent 70%
     );
     animation: drift 22s var(--ease-inOut) infinite reverse;
@@ -227,74 +271,57 @@
   }
 
   /* ---------------------------------------------------------------------
-     The Coursen mark drawing itself
+     Logo reveal - translated from motion/coursen-logo-reveal-light.svg
 
-     Used by the entrance animation and the hero. The dash length is the
-     measured length of the mark path; hardcoding it avoids a getTotalLength()
-     call and a layout read on every mount.
+     The kit's study is an animated SVG; this is the same choreography in CSS
+     so it renders at any size, in any colour, without shipping a video:
+
+       curve      begins 0.08s, draws for 0.70s, keySplines 0.22 1 0.36 1
+       waypoint   begins 0.64s, fades for 0.30s
+       wordmark   begins 0.83s, fades for 0.52s   -> 1.35s total
+
+     `pathLength="100"` is not needed because the dash array is expressed in
+     the same 0-100 space the kit uses.
      --------------------------------------------------------------------- */
-  .mark-trace {
-    /* Measured length of brand.mark.path: a 268.83deg arc at r=21 is 98.53
-       units. Rounded up to 99 so the stroke starts fully hidden. Hardcoded
-       rather than read via getTotalLength() to avoid a layout read on every
-       mount; packages/shared/src/brand.test.ts pins the path so this cannot
-       silently go stale. */
-    --trace-length: 99;
-    stroke-dasharray: var(--trace-length);
-    stroke-dashoffset: var(--trace-length);
-    animation: trace var(--duration-deliberate) var(--ease-out) forwards;
+  .mark-curve {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    /* The path is 84.8 units long at r=18; normalise so 100 spans it fully. */
+    animation: draw-curve 700ms var(--ease-out) 80ms forwards;
   }
-  .mark-dot {
+  .mark-waypoint {
     opacity: 0;
-    transform-origin: center;
-    animation: scale-in var(--duration-base) var(--ease-spring) forwards;
-    animation-delay: var(--duration-deliberate);
+    animation: fade-in 300ms var(--ease-out) 640ms forwards;
+  }
+  .mark-wordmark {
+    opacity: 0;
+    animation: fade-in 520ms var(--ease-out) 830ms forwards;
+  }
+
+  /* The entrance's supporting line, held back until the wordmark lands so
+     the reveal reads as one gesture rather than three things appearing. */
+  .entrance-line {
+    opacity: 0;
+    animation: fade-in 320ms var(--ease-out) 1150ms forwards;
   }
 
   /* ---------------------------------------------------------------------
-     Hero connector packet
+     Workspace activity - from motion/coursen-workspace-loading.svg
 
-     A dot travelling from the Classroom lane (12.5% across) into the Coursen
-     core (50% across), i.e. 37.5% of the container width.
-
-     The dot sits inside a full-width track and the TRACK is what animates: a
-     percentage translate resolves against the animated element's own size, so
-     translating the 6px dot by 37.5% would move it 2px. Translating a
-     full-width track by 37.5% moves it 37.5% of the container. Transform
-     only - no layout, stays on the compositor.
+     "Keep the C still. Let the work move." The C does not spin, pulse or
+     scale: a fixed-length highlight travels around a stationary track. There
+     is no percentage, because the application is not measuring anything.
      --------------------------------------------------------------------- */
-  .packet-track {
-    position: absolute;
-    inset: 0;
-    animation: packet-travel 1.5s var(--ease-inOut) infinite;
-    will-change: transform, opacity;
+  .activity-track {
+    stroke: hsl(var(--border));
   }
-  .packet-dot {
-    position: absolute;
-    left: 12.5%;
-    top: 0;
-    height: 6px;
-    width: 6px;
-    margin-left: -3px;
-    border-radius: 9999px;
-    background: var(--depth-glow);
-    box-shadow: 0 0 12px 2px rgba(127, 178, 240, 0.6);
+  .activity-sweep {
+    stroke-dasharray: 18 100;
+    stroke-dashoffset: 0;
+    animation: activity-sweep var(--duration-loop) linear infinite;
   }
-  @keyframes packet-travel {
-    0% {
-      opacity: 0;
-      transform: translate3d(0, 0, 0);
-    }
-    15% {
-      opacity: 1;
-    }
-    85% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translate3d(37.5%, 42px, 0);
-    }
+  .activity-waypoint {
+    animation: activity-dot var(--duration-loop) var(--ease-inOut) infinite;
   }
 
   /* The hero demo's arriving card is hidden until the sequence reaches it.
@@ -318,6 +345,101 @@
   .lift:hover {
     transform: translate3d(0, -3px, 0);
     box-shadow: var(--shadow-mid);
+  }
+}
+
+/* -----------------------------------------------------------------------
+   Keyframes
+
+   Defined here rather than in tailwind.config.ts. Tailwind only emits a
+   theme keyframe when a matching `animate-*` utility is generated, and most
+   of these are driven by the component classes above - which Tailwind never
+   scans. Declared here they always ship, and the `animate-*` utilities
+   resolve to them by name.
+
+   Entrance transforms end on `none`, not on an identity transform: these run
+   with `both`, and any transform value an element keeps makes it the
+   containing block for its `position: fixed` descendants.
+   ----------------------------------------------------------------------- */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale3d(0.96, 0.96, 1);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The Coursen mark drawing itself, per the kit's reveal study. */
+@keyframes draw-curve {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Workspace loading: a highlight travelling a STATIONARY C.
+   "Keep the C still. Let the work move." (guide page 32) */
+@keyframes activity-sweep {
+  from {
+    stroke-dashoffset: 18;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+/* Assistant activity: a restrained three-dot rhythm. */
+@keyframes activity-dot {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* A slow, barely-there drift for ambient background layers. */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0) scale(1.03);
+  }
+}
+
+/* Loading shimmer for skeletons. */
+@keyframes shimmer {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(100%, 0, 0);
   }
 }
 

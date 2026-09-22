@@ -26,9 +26,15 @@ export const metadata: Metadata = {
   title: { default: `${brand.name} - ${brand.tagline}`, template: `%s · ${brand.shortName}` },
   description: brand.description,
   applicationName: brand.name,
+  // Official Brand Kit v2 icon masters. The .ico carries 16/32/48 for legacy
+  // surfaces; the SVG is the optically adjusted small-size master, which the
+  // kit supplies precisely because the waypoint needs more weight below 32px.
   icons: {
-    icon: '/brand/favicon-32.png',
-    apple: '/brand/apple-touch-icon.png',
+    icon: [
+      { url: '/brand/icons/coursen-favicon.ico', sizes: '16x16 32x32 48x48' },
+      { url: '/brand/icons/coursen-favicon-32.svg', type: 'image/svg+xml' },
+    ],
+    apple: { url: '/brand/icons/coursen-app-180.png', sizes: '180x180' },
   },
   // No metadataBase or canonical URL: the working domain is not owned.
 };

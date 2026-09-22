@@ -1,10 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
-import {
-  CalendarDays,
-  FileText,
-  FolderOpen,
-  GraduationCap,
-} from 'lucide-react';
+import type { CoursenIconName } from '@/components/coursen-icon';
 
 /**
  * MARKETING DEMO CONTENT ONLY.
@@ -21,17 +15,17 @@ import {
 export interface DemoSource {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: CoursenIconName;
   /** Whether the real integration exists today. Drives honest UI labelling. */
   live: boolean;
 }
 
 /** The four services the product story connects. */
 export const DEMO_SOURCES: DemoSource[] = [
-  { id: 'classroom', label: 'Classroom', icon: GraduationCap, live: true },
-  { id: 'calendar', label: 'Calendar', icon: CalendarDays, live: false },
-  { id: 'drive', label: 'Drive', icon: FolderOpen, live: false },
-  { id: 'docs', label: 'Docs', icon: FileText, live: false },
+  { id: 'classroom', label: 'Classroom', icon: 'classes', live: true },
+  { id: 'calendar', label: 'Calendar', icon: 'calendar', live: false },
+  { id: 'drive', label: 'Drive', icon: 'file', live: false },
+  { id: 'docs', label: 'Docs', icon: 'assignment', live: false },
 ];
 
 export interface DemoAssignment {
@@ -50,7 +44,7 @@ export const DEMO_ASSIGNMENTS: DemoAssignment[] = [
     course: 'AP Chemistry',
     title: 'Titration Lab Report',
     due: 'Tomorrow, 11:59 PM',
-    accent: 'bg-[#7FB2F0]',
+    accent: 'bg-primary',
     points: 50,
   },
   {
@@ -58,7 +52,7 @@ export const DEMO_ASSIGNMENTS: DemoAssignment[] = [
     course: 'Calculus AB',
     title: 'Limits Practice Set',
     due: 'Friday',
-    accent: 'bg-[#8FD3C1]',
+    accent: 'bg-sky',
     points: 20,
   },
   {
@@ -66,7 +60,7 @@ export const DEMO_ASSIGNMENTS: DemoAssignment[] = [
     course: 'English Literature',
     title: 'Gatsby Close Reading',
     due: 'Next Monday',
-    accent: 'bg-[#E3B7F0]',
+    accent: 'bg-muted-foreground',
     points: 100,
   },
 ];

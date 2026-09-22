@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { brand } from '@classpilot/shared';
-import { ArrowUpRight, CircleAlert } from 'lucide-react';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { BrandMark } from '@/components/brand-logo';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -14,7 +14,7 @@ export function ErrorState({
   return (
     <Card className="border-destructive/30">
       <CardContent className="space-y-4 pt-6">
-        <CircleAlert className="h-7 w-7 text-destructive" aria-hidden="true" />
+        <CoursenIcon name="attention" className="h-7 w-7 text-error-text" />
         <div>
           <h2 className="font-semibold">{title}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -53,7 +53,7 @@ export function EmptyState({
   return (
     <Card>
       <CardContent className="space-y-5 px-6 py-9 sm:px-8">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary">
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-secondary">
           <BrandMark className="h-12 w-12" />
         </div>
         <div className="max-w-lg space-y-2">
@@ -71,7 +71,7 @@ export function EmptyState({
         ) : null}
         <Link href="/integrations" className="action-link">
           Set up Classroom sync{' '}
-          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          <CoursenIcon name="arrow" className="h-4 w-4" />
         </Link>
       </CardContent>
     </Card>

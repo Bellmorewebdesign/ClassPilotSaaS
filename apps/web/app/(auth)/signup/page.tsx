@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Check } from 'lucide-react';
 import { brand } from '@classpilot/shared';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { AuthCard, GoogleButtonPreview } from '@/components/auth/auth-card';
 
 export const metadata: Metadata = { title: 'Get started' };
@@ -23,14 +23,14 @@ const INCLUDED = [
 export default function SignUpPage() {
   return (
     <AuthCard
-      title={`Get started with ${brand.shortName}`}
-      lede="Account creation opens when Coursen leaves early preview."
+      title="Get started."
+      lede={`Account creation opens when ${brand.shortName} leaves early preview.`}
       footer={
         <>
           Already set up?{' '}
           <Link
             href="/signin"
-            className="font-semibold text-depth-ink underline underline-offset-4"
+            className="font-semibold text-primary underline underline-offset-4"
           >
             Sign in
           </Link>
@@ -42,13 +42,9 @@ export default function SignUpPage() {
           {INCLUDED.map((item) => (
             <li
               key={item}
-              className="flex items-start gap-2.5 text-[13px] leading-relaxed text-depth-muted"
+              className="flex items-start gap-2.5 text-small-body text-muted-foreground"
             >
-              <Check
-                className="mt-0.5 h-4 w-4 shrink-0 text-depth-glow"
-                strokeWidth={2.5}
-                aria-hidden="true"
-              />
+              <CoursenIcon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-success" />
               {item}
             </li>
           ))}
@@ -59,7 +55,7 @@ export default function SignUpPage() {
         <div>
           <label
             htmlFor="signup-email"
-            className="mb-1.5 block text-[12px] font-medium text-depth-muted"
+            className="mb-1.5 block text-label text-foreground"
           >
             Or sign up with email
           </label>
@@ -69,23 +65,23 @@ export default function SignUpPage() {
             disabled
             placeholder="you@school.edu"
             aria-describedby="signup-email-note"
-            className="min-h-12 w-full cursor-not-allowed rounded-xl border border-depth-line bg-white/[0.02] px-4 text-[14px] text-depth-muted placeholder:text-depth-muted/60"
+            className="min-h-12 w-full cursor-not-allowed rounded-md border border-border bg-disabled-fill px-4 text-body text-disabled placeholder:text-disabled/70"
           />
-          <p id="signup-email-note" className="mt-2 text-[12px] text-depth-muted">
+          <p id="signup-email-note" className="mt-2 text-metadata text-muted-foreground">
             Email sign-up is not available in this build.
           </p>
         </div>
 
-        <div className="rounded-xl border border-depth-line bg-white/[0.03] p-4">
-          <p className="text-[13px] font-semibold text-depth-ink">
+        <div className="rounded-lg bg-secondary p-4">
+          <p className="text-label text-foreground">
             Running {brand.shortName} locally?
           </p>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-depth-muted">
+          <p className="mt-1.5 text-small-body text-muted-foreground">
             Development mode opens the workspace without an account.
           </p>
           <Link
             href="/signin"
-            className="mt-3 inline-flex min-h-11 items-center text-[13px] font-semibold text-depth-glow underline underline-offset-4"
+            className="mt-3 inline-flex min-h-11 items-center text-label text-primary underline underline-offset-4"
           >
             Open the development workspace &rarr;
           </Link>

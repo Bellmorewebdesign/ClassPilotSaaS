@@ -9,13 +9,20 @@
   </head>
   <body>
     <header class="header">
-      <div class="brand">
-        <img class="mark" src="brand-mark.svg" alt="" width="36" height="36" />
-        <div>
-          <h1>{{brand.extensionName}}</h1>
-          <p class="brand-caption">Your coursework, connected.</p>
-        </div>
-      </div>
+      <!--
+        The official Brand Kit v2 Sync lockup, used as supplied. The wordmark
+        is outlined in the master, so it renders identically whether or not
+        the bundled font has loaded.
+      -->
+      <h1 class="lockup-heading">
+        <img
+          class="lockup"
+          src="coursen-sync.svg"
+          alt="{{brand.extensionName}}"
+          width="134"
+          height="30"
+        />
+      </h1>
       <button
         type="button"
         id="settings-toggle"
@@ -38,15 +45,22 @@
           <span class="dot" data-state="pending" aria-hidden="true"></span>
           <span class="status-text">Checking {{brand.shortName}}&hellip;</span>
         </li>
+        <li class="status-meta" id="last-sync">No sync yet.</li>
       </ul>
-
-      <p class="last-sync" id="last-sync">No sync yet.</p>
 
       <!-- Live progress, shown only while syncing -->
       <section class="progress" id="progress" hidden aria-live="polite">
+        <!--
+          The mark holds still while the work moves around it, per the kit's
+          motion notes. It is the same generated master the rest of the
+          product uses, so there is one source of geometry.
+        -->
+        <img class="progress-mark" src="brand-mark.svg" alt="" width="36" height="36" />
+
         <p class="progress-phase" id="progress-phase">
           Syncing Classroom&hellip;
         </p>
+        <p class="progress-current" id="progress-current"></p>
 
         <div class="progress-row">
           <span class="progress-label">Classes</span>
@@ -59,8 +73,6 @@
           <span class="progress-count" id="progress-assignments">0 / 0</span>
         </div>
         <div class="bar"><div class="bar-fill" id="bar-assignments"></div></div>
-
-        <p class="progress-current" id="progress-current"></p>
       </section>
 
       <!-- Result of the last sync -->
@@ -83,12 +95,16 @@
           Sync Classroom
         </button>
         <button type="button" id="cancel-button" class="secondary" hidden>
-          Cancel
+          Cancel sync
         </button>
         <button type="button" id="open-app" class="secondary">
           Open {{brand.shortName}}
         </button>
       </div>
+
+      <p class="footnote">
+        Classroom data is a snapshot of your last successful sync.
+      </p>
     </main>
 
     <!-- Settings -->

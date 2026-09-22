@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { brand } from '@classpilot/shared';
 import { BrandMark } from '@/components/brand-logo';
 import { Reveal } from '@/components/motion/reveal';
@@ -10,7 +10,7 @@ export function FinalCta() {
       <div className="depth-ambient" aria-hidden="true" />
 
       <Reveal className="relative mx-auto max-w-2xl text-center">
-        <BrandMark className="mx-auto h-11 w-11 text-depth-glow" />
+        <BrandMark className="mx-auto h-11 w-11 text-depth-accent" />
         <h2 className="mt-7 text-3xl font-semibold tracking-[-0.04em] text-depth-ink sm:text-[2.75rem] sm:leading-[1.08]">
           Put your whole school week in one place
         </h2>
@@ -24,7 +24,7 @@ export function FinalCta() {
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-depth-ink px-6 text-[15px] font-semibold text-depth-base shadow-mid transition-[transform,box-shadow] duration-fast ease-out hover:-translate-y-0.5 hover:shadow-high active:translate-y-0"
           >
             Get started
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <CoursenIcon name="arrow" className="h-4 w-4" />
           </Link>
           <Link href="/signin" className="quiet-link min-h-12 px-6 text-[15px]">
             Sign in

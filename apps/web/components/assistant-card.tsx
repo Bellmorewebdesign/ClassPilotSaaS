@@ -1,74 +1,72 @@
-import { ArrowUp, Sparkles } from 'lucide-react';
 import { brand } from '@classpilot/shared';
 import { BrandMark } from '@/components/brand-logo';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Ask Coursen, in the workspace.
  *
- * Shows the questions the assistant is being built to answer and nothing
- * else. There is no fake response, no typing indicator, no simulated thread -
- * the composer is visibly disabled and every affordance says "preview".
+ * "Leave room for help. Be honest about readiness." (guide page 26). The kit's
+ * dashboard concept gives the assistant a Light brand panel, a clear
+ * readiness label, and a prompt field - and no answers. This does the same.
  *
- * Faking an answer here would be the most misleading thing in the product,
- * because unlike the marketing page this sits beside the user's real data and
- * would read as though it had understood it.
+ * There is deliberately no simulated response, no typing indicator and no
+ * thread: unlike the marketing page this sits beside real coursework, where a
+ * fake answer would read as though Coursen had understood it.
+ *
+ * The three-dot activity mark below is the kit's assistant-activity study. It
+ * is a VISUAL STATE only - the kit is explicit that it is "not a claim about
+ * hidden reasoning" - so it is shown as a static rest state here, animating
+ * only if the assistant is ever actually working.
  */
-const SUGGESTIONS = [
-  'What do I have due this week?',
-  'Anything missing?',
-  'What should I work on first?',
-] as const;
-
 export function AssistantCard() {
   return (
-    <Card className="border-primary/15 bg-secondary/40">
+    <Card className="border-transparent bg-secondary">
       <CardContent className="pt-6">
-        <div className="mb-4 flex items-center gap-2.5">
-          <BrandMark className="h-6 w-6" />
-          <h2 className="text-[15px] font-semibold">{brand.assistantTitle}</h2>
-          <Badge variant="outline" className="ml-auto bg-card text-[10px]">
-            In development
-          </Badge>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <BrandMark size={28} className="h-7 w-7" />
+          <span className="text-metadata text-muted-foreground">
+            Future concept
+          </span>
         </div>
 
-        <p className="text-[13px] leading-relaxed text-muted-foreground">
-          Once more of your school connects, Coursen will answer from your own
-          coursework.
+        <h2 className="card-heading text-foreground">{brand.assistantTitle}</h2>
+        <p className="mt-2 text-small-body text-muted-foreground">
+          {brand.assistantPlaceholder}
         </p>
 
-        <ul className="mt-4 space-y-1.5">
-          {SUGGESTIONS.map((prompt) => (
-            <li
-              key={prompt}
-              className="flex items-start gap-2 rounded-lg border bg-card px-3 py-2.5 text-[13px] leading-snug text-muted-foreground"
-            >
-              <Sparkles
-                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-              {prompt}
-            </li>
-          ))}
-        </ul>
-
-        {/* Disabled composer. Present so the intended shape is legible. */}
-        <div className="mt-4 flex items-center gap-2 rounded-xl border border-input/50 bg-card/60 p-2 pl-3.5">
-          <span className="flex-1 truncate text-[13px] text-muted-foreground/70">
-            {brand.assistantPlaceholder}
-          </span>
-          <button
-            type="button"
-            disabled
-            aria-label={`${brand.assistantTitle} is not available in this build`}
-            className="flex h-9 w-9 shrink-0 cursor-not-allowed items-center justify-center rounded-lg bg-secondary text-primary/50"
-          >
-            <ArrowUp className="h-4 w-4" aria-hidden="true" />
-          </button>
+        {/* Composer, visibly not available. */}
+        <div className="mt-5 rounded-md border border-input bg-card px-4 py-3">
+          <p className="truncate text-small-body text-muted-foreground/80">
+            What should I work on next?
+          </p>
         </div>
+
+        <p className="mt-3 text-metadata text-muted-foreground">
+          Coursen will answer from your synced coursework. Not available in this
+          build.
+        </p>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * The assistant's activity mark, for when the assistant genuinely is working.
+ *
+ * Exported but unused today - there is nothing to be busy about yet. Kept
+ * here so the kit's rhythm (three dots, 0.4s apart, 2.4s cycle) lives with
+ * the component it belongs to rather than being reinvented later.
+ */
+export function AssistantActivity() {
+  return (
+    <span className="flex items-center gap-1.5" aria-label="Working">
+      {[0, 1, 2].map((index) => (
+        <span
+          key={index}
+          className="activity-waypoint h-1.5 w-1.5 rounded-full bg-primary"
+          style={{ animationDelay: `${index * 400}ms` }}
+        />
+      ))}
+    </span>
   );
 }

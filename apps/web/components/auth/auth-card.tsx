@@ -1,7 +1,13 @@
 import type { ReactNode } from 'react';
 import { Reveal } from '@/components/motion/reveal';
 
-/** Shared frame for the sign-in and sign-up screens. */
+/**
+ * Sign-in / sign-up frame.
+ *
+ * Per the kit concept this is not a card on a card: the form sits directly on
+ * the surface, with the heading doing the containing. Fewer boxes, calmer
+ * page.
+ */
 export function AuthCard({
   title,
   lede,
@@ -14,16 +20,14 @@ export function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <Reveal className="w-full max-w-[26rem]">
-      <div className="glass-dark rounded-2xl p-7 sm:p-8">
-        <h1 className="text-2xl font-semibold tracking-[-0.03em] text-depth-ink">
-          {title}
-        </h1>
-        <p className="mt-2 text-[14px] leading-relaxed text-depth-muted">{lede}</p>
-        <div className="mt-7">{children}</div>
-      </div>
+    <Reveal>
+      <h1 className="text-h1 text-foreground">{title}</h1>
+      <p className="mt-2 text-body text-muted-foreground">{lede}</p>
+      <div className="mt-8">{children}</div>
       {footer ? (
-        <div className="mt-5 text-center text-[13px] text-depth-muted">{footer}</div>
+        <div className="mt-8 border-t pt-6 text-small-body text-muted-foreground">
+          {footer}
+        </div>
       ) : null}
     </Reveal>
   );
@@ -32,10 +36,9 @@ export function AuthCard({
 /**
  * The Google button.
  *
- * Rendered disabled everywhere it appears, because Google OAuth does not
- * exist in this build. It is shown rather than hidden so the intended flow is
- * legible, but it must never look clickable - a button that silently does
- * nothing is worse than one that says why.
+ * Disabled everywhere it appears, because Google OAuth does not exist in this
+ * build. Shown rather than hidden so the intended flow is legible, and styled
+ * with the kit's Disabled-fill role so it cannot read as available.
  */
 export function GoogleButtonPreview({ label }: { label: string }) {
   return (
@@ -44,15 +47,12 @@ export function GoogleButtonPreview({ label }: { label: string }) {
         type="button"
         disabled
         aria-describedby="google-preview-note"
-        className="flex min-h-12 w-full cursor-not-allowed items-center justify-center gap-3 rounded-xl border border-depth-line bg-white/[0.03] px-4 text-[14px] font-semibold text-depth-muted"
+        className="disabled-link w-full"
       >
         <GoogleGlyph />
         {label}
       </button>
-      <p
-        id="google-preview-note"
-        className="mt-2 text-center text-[12px] text-depth-muted"
-      >
+      <p id="google-preview-note" className="mt-2 text-metadata text-muted-foreground">
         Google sign-in is not available in this build.
       </p>
     </div>

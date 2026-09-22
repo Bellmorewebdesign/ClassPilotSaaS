@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { Sparkles } from 'lucide-react';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { brand } from '@classpilot/shared';
 import { BrandMark } from '@/components/brand-logo';
 import { Reveal } from '@/components/motion/reveal';
@@ -39,9 +39,9 @@ export function AskPreview() {
         />
 
         <Reveal step={1}>
-          <div ref={root} className="glass-dark rounded-2xl p-5">
+          <div ref={root} className="glass-dark rounded-lg p-5">
             <div className="mb-4 flex items-center gap-2.5">
-              <BrandMark className="h-5 w-5 text-depth-glow" />
+              <BrandMark className="h-5 w-5 text-depth-accent" />
               <span className="text-[13px] font-semibold text-depth-ink">
                 {brand.assistantTitle}
               </span>
@@ -52,11 +52,7 @@ export function AskPreview() {
 
             {/* The cycling prompt. */}
             <div className="relative flex min-h-[3.25rem] items-center gap-3 rounded-xl border border-depth-line-strong bg-depth-base/60 px-4">
-              <Sparkles
-                className="h-4 w-4 shrink-0 text-depth-glow"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
+              <CoursenIcon name="search" className="h-4 w-4 shrink-0 text-depth-accent" />
               <span className="relative min-w-0 flex-1 overflow-hidden py-3">
                 {DEMO_PROMPTS.map((prompt, index) => (
                   <span
