@@ -18,6 +18,21 @@ import { cn } from '@/lib/utils';
  * Pale-on-white is also documented misuse, which is why there is no "sky"
  * tone: Signature sky is a large-accent colour and is only ever used for the
  * mark on the dark ink surface, where the kit's own dark reveal uses it.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY `width` AND `height` ATTRIBUTES ARE NOT OPTIONAL HERE
+ *
+ * An <svg> with a viewBox and no width/height has no intrinsic size. CSS
+ * normally supplies one, but there is a window where CSS has not arrived
+ * yet: a client-side route change commits the new DOM before the route's
+ * stylesheet chunk loads. In that window the mark falls back to `width:100%`
+ * of its containing block - and on the sign-in page, where the brand panel's
+ * `hidden lg:flex` has not applied either, that block is the whole document.
+ *
+ * Measured navigating home -> /signin before this fix: a 1440x1440px Waypoint
+ * C, larger than the viewport, for 12 frames. Presentation attributes are in
+ * the markup itself, so they hold from the very first paint and CSS still
+ * wins whenever it does arrive.
  */
 export function BrandMark({
   className,
@@ -39,6 +54,10 @@ export function BrandMark({
   return (
     <svg
       viewBox="0 0 64 64"
+      // Intrinsic size, so the mark is never unbounded before CSS applies.
+      // A `className` or `style` still overrides it.
+      width={size}
+      height={size}
       aria-hidden="true"
       className={cn('shrink-0 text-primary', className)}
       style={style}

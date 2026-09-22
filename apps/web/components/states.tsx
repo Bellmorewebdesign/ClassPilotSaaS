@@ -54,7 +54,7 @@ export function EmptyState({
     <Card>
       <CardContent className="space-y-5 px-6 py-9 sm:px-8">
         <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-secondary">
-          <BrandMark className="h-12 w-12" />
+          <BrandMark size={48} className="h-12 w-12" />
         </div>
         <div className="max-w-lg space-y-2">
           <h2 className="text-xl font-semibold tracking-tight">{title}</h2>

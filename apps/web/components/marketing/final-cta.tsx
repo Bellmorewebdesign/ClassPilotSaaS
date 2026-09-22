@@ -10,7 +10,7 @@ export function FinalCta() {
       <div className="depth-ambient" aria-hidden="true" />
 
       <Reveal className="relative mx-auto max-w-2xl text-center">
-        <BrandMark className="mx-auto h-11 w-11 text-depth-accent" />
+        <BrandMark size={44} className="mx-auto h-11 w-11 text-depth-accent" />
         <h2 className="mt-7 text-3xl font-semibold tracking-[-0.04em] text-depth-ink sm:text-[2.75rem] sm:leading-[1.08]">
           Put your whole school week in one place
         </h2>

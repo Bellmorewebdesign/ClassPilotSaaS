@@ -41,7 +41,7 @@ export function AskPreview() {
         <Reveal step={1}>
           <div ref={root} className="glass-dark rounded-lg p-5">
             <div className="mb-4 flex items-center gap-2.5">
-              <BrandMark className="h-5 w-5 text-depth-accent" />
+              <BrandMark size={20} className="h-5 w-5 text-depth-accent" />
               <span className="text-[13px] font-semibold text-depth-ink">
                 {brand.assistantTitle}
               </span>

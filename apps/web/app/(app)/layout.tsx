@@ -48,7 +48,7 @@ export default async function AppLayout({
 
         <div className="mt-auto space-y-4">
           <div className="rounded-xl border bg-secondary/50 p-4">
-            <BrandMark className="mb-2 h-6 w-6" />
+            <BrandMark size={24} className="mb-2 h-6 w-6" />
             <p className="text-[13px] font-semibold">{brand.extensionName}</p>
             <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
               Sync Classroom from your own browser session.
