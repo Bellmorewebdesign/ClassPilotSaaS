@@ -5,6 +5,7 @@ import type {
   PopupRequest,
   PopupResponse,
   ProgressBroadcast,
+  SyncMode,
   SyncProgress,
   SyncSummary,
 } from '../lib/messages.js';
@@ -35,6 +36,7 @@ const ui = {
 
   progress: el('progress'),
   progressPhase: el('progress-phase'),
+  progressMode: el('progress-mode'),
   progressClasses: el('progress-classes'),
   progressAssignments: el('progress-assignments'),
   barClasses: el('bar-classes'),
@@ -48,7 +50,13 @@ const ui = {
   warnings: el('warnings'),
 
   error: el('error'),
+  errorTitle: el('error-title'),
   errorMessage: el('error-message'),
+
+  resume: el('resume'),
+  resumeNote: el('resume-note'),
+  resumeButton: el<HTMLButtonElement>('resume-button'),
+  restartButton: el<HTMLButtonElement>('restart-button'),
 
   syncButton: el<HTMLButtonElement>('sync-button'),
   cancelButton: el<HTMLButtonElement>('cancel-button'),
@@ -114,14 +122,32 @@ const PHASE_LABELS: Record<SyncProgress['phase'], string> = {
   checking_session: 'Checking your Classroom session…',
   discovering_classes: 'Finding your classes…',
   discovering_classwork: 'Reading Classwork pages…',
+  reading_announcements: 'Reading announcements…',
   reading_assignments: 'Reading assignments…',
   uploading: `Saving to ${brand.shortName}…`,
   complete: 'Sync complete',
   failed: 'Sync failed',
 };
 
+/** What each policy is doing, in the student's terms. */
+const MODE_LABELS: Record<SyncMode, string> = {
+  initial_backfill: 'First sync - reading everything',
+  incremental: 'Checking for changes',
+  incremental_fast: 'Quick check',
+  deep_reconcile: 'Rechecking everything',
+  targeted_rescan: 'Rechecking one class',
+};
+
 function renderProgress(progress: SyncProgress): void {
-  ui.progressPhase.textContent = PHASE_LABELS[progress.phase];
+  /*
+   * Waiting on Classroom is its own state, said plainly. The alternative -
+   * a spinner over a stalled counter - reads as progress that is not
+   * happening.
+   */
+  ui.progressPhase.textContent = progress.waitingForClassroom
+    ? 'Waiting for Classroom to finish loading…'
+    : PHASE_LABELS[progress.phase];
+  ui.progressMode.textContent = MODE_LABELS[progress.mode];
   ui.progressClasses.textContent = `${progress.classesDone} / ${progress.classesTotal}`;
   ui.progressAssignments.textContent = `${progress.assignmentsDone} / ${progress.assignmentsTotal}`;
   ui.barClasses.style.width = percent(progress.classesDone, progress.classesTotal);
@@ -136,18 +162,42 @@ function percent(done: number, total: number): string {
 
 function renderSummary(summary: SyncSummary): void {
   const hasWarnings = summary.warnings.length > 0;
+  const c = summary.counts;
 
-  ui.resultTitle.textContent = hasWarnings
-    ? 'Sync complete with warnings'
-    : 'Sync complete';
+  if (summary.fatal) {
+    // The error panel below already says the sync was interrupted. This card
+    // answers the next question: what was actually saved before it stopped.
+    ui.resultTitle.textContent = 'Saved before it stopped';
+  } else if (hasWarnings) {
+    ui.resultTitle.textContent =
+      summary.warnings.length === 1
+        ? 'Sync completed with 1 warning'
+        : `Sync completed with ${summary.warnings.length} warnings`;
+  } else {
+    ui.resultTitle.textContent = 'Sync complete';
+  }
 
-  ui.resultStats.replaceChildren(
-    statRow('Classes', summary.classes),
-    statRow('Assignments', summary.assignments),
-    statRow('New', summary.created),
-    statRow('Updated', summary.updated),
-    ...(hasWarnings ? [statRow('Could not be read', summary.warnings.length)] : []),
-  );
+  /*
+   * Discovered and read are shown separately whenever they differ. Folding
+   * them into one number is what made "20 assignments" mean "20 we tried".
+   */
+  const rows = [
+    statRow('Classes', c.classesRead, c.classesDiscovered),
+    statRow('Assignments read', c.assignmentsRead, c.assignmentsDiscovered),
+  ];
+  if (c.materialsDiscovered > 0) {
+    rows.push(statRow('Materials read', c.materialsRead, c.materialsDiscovered));
+  }
+  if (c.announcementsDiscovered > 0) {
+    rows.push(statRow('Announcements', c.announcementsDiscovered));
+  }
+  if (c.detailsSkippedUnchanged > 0) {
+    rows.push(statRow('Already up to date', c.detailsSkippedUnchanged));
+  }
+  rows.push(statRow('New', c.created), statRow('Updated', c.updated));
+  if (hasWarnings) rows.push(statRow('Could not be read', summary.warnings.length));
+
+  ui.resultStats.replaceChildren(...rows);
 
   ui.warningsToggle.hidden = !hasWarnings;
   ui.warnings.hidden = true;
@@ -162,14 +212,37 @@ function renderSummary(summary: SyncSummary): void {
   ui.result.hidden = false;
 }
 
-function statRow(label: string, value: number): HTMLLIElement {
+/**
+ * One summary row.
+ *
+ * When `outOf` is supplied and differs from `value`, the row reads "12 of 15"
+ * - the honest shape for "we found fifteen and could read twelve".
+ */
+function statRow(label: string, value: number, outOf?: number): HTMLLIElement {
   const row = document.createElement('li');
   const name = document.createElement('span');
   name.textContent = label;
   const count = document.createElement('span');
-  count.textContent = String(value);
+  count.textContent =
+    outOf !== undefined && outOf !== value ? `${value} of ${outOf}` : String(value);
   row.append(name, count);
   return row;
+}
+
+/** Why an interrupted sync stopped, in a sentence. */
+function describeReason(reason: string): string {
+  switch (reason) {
+    case 'helper_tab_closed':
+      return 'the Classroom sync tab was closed';
+    case 'not_signed_in':
+      return 'Classroom was not signed in';
+    case 'home_unreadable':
+      return 'the Classroom home page could not be read';
+    case 'unauthorized':
+      return 'the API token was rejected';
+    default:
+      return reason.replace(/_/g, ' ');
+  }
 }
 
 function formatTimestamp(iso: string): string {
@@ -195,9 +268,9 @@ function render(state: ExtensionState): void {
   const connection = describeConnection(state.connection);
   setStatus(ui.statusConnection, connection.state, connection.text);
 
-  ui.lastSync.textContent = state.lastSummary
-    ? `Last sync: ${formatTimestamp(state.lastSummary.finishedAt)}`
-    : 'No sync yet.';
+  ui.lastSync.textContent = state.sync.lastSuccessfulSyncAt
+    ? `Last successful sync: ${formatTimestamp(state.sync.lastSuccessfulSyncAt)}`
+    : 'No completed sync yet.';
 
   ui.progress.hidden = !state.syncing;
   if (state.syncing) renderProgress(state.progress);
@@ -210,11 +283,32 @@ function render(state: ExtensionState): void {
   }
 
   ui.error.hidden = state.lastError === null;
-  if (state.lastError) ui.errorMessage.textContent = state.lastError.message;
+  if (state.lastError) {
+    /*
+     * The helper tab closing is a specific, actionable thing, not a generic
+     * failure, so it gets its own sentence and its own recovery.
+     */
+    ui.errorTitle.textContent =
+      state.lastError.code === 'helper_tab_closed' ? 'Sync interrupted' : 'Sync failed';
+    ui.errorMessage.textContent = state.lastError.message;
+  }
+
+  /*
+   * Resume is offered when a previous run was interrupted and we are not
+   * already running. It starts the same mode again; the per-item freshness
+   * record is what stops it repeating work it already finished.
+   */
+  const interrupted = state.sync.interrupted;
+  ui.resume.hidden = state.syncing || interrupted === null;
+  if (interrupted) {
+    ui.resumeNote.textContent = `The last sync stopped before it finished (${describeReason(interrupted.reason)}).`;
+  }
 
   ui.syncButton.hidden = state.syncing;
   ui.cancelButton.hidden = !state.syncing;
   ui.syncButton.disabled = state.connection.state === 'unconfigured';
+  ui.syncButton.textContent =
+    state.sync.nextMode === 'initial_backfill' ? 'Start first sync' : 'Sync Classroom';
 
   ui.apiUrl.value = state.settings.apiUrl;
   ui.tokenHint.textContent = state.settings.hasToken
@@ -238,6 +332,22 @@ ui.syncButton.addEventListener('click', () => {
   ui.error.hidden = true;
   ui.result.hidden = true;
   void send({ type: 'START_SYNC' }).then(refresh);
+});
+
+/*
+ * Resume continues with the same policy; the stored per-item freshness makes
+ * the already-read pages cheap to skip. Start again forces a full reread.
+ */
+ui.resumeButton.addEventListener('click', () => {
+  ui.error.hidden = true;
+  ui.resume.hidden = true;
+  void send({ type: 'START_SYNC' }).then(refresh);
+});
+
+ui.restartButton.addEventListener('click', () => {
+  ui.error.hidden = true;
+  ui.resume.hidden = true;
+  void send({ type: 'START_SYNC', mode: 'deep_reconcile' }).then(refresh);
 });
 
 ui.cancelButton.addEventListener('click', () => {

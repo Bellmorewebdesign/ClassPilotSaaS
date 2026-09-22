@@ -1,3 +1,4 @@
+import { Window } from 'happy-dom';
 import { describe, expect, it } from 'vitest';
 import { loadFixture } from '../__tests__/helpers/loadFixture.js';
 import { extractClassworkPage, extractDueLabel } from './classworkPage.js';
@@ -101,5 +102,75 @@ describe('extractDueLabel', () => {
   it('returns null for text with no due information', () => {
     expect(extractDueLabel('')).toBeNull();
     expect(extractDueLabel('Chapter 4 Reading')).toBeNull();
+  });
+});
+
+/**
+ * Coursework URL kinds.
+ *
+ * This extractor used to build every discovered item's detail URL as
+ * `/c/<courseId>/a/<workId>/details` regardless of the link it came from,
+ * which silently turned every MATERIAL into a non-existent assignment page.
+ * The helper tab then navigated somewhere that did not exist, and the item
+ * came back unreadable.
+ */
+describe('assignment and material URLs are never confused', () => {
+  const COURSE = 'Njk5MjMxMjM';
+  const WORK = 'NTQzMjE5OA';
+  const MATERIAL = 'ODc2NTQzMjE';
+
+  function pageWith(hrefs: string[]): Document {
+    const window = new Window();
+    window.document.body.innerHTML = `<main><ul>${hrefs
+      .map((href) => `<li role="listitem"><a href="${href}">Item</a></li>`)
+      .join('')}</ul></main>`;
+    return window.document as unknown as Document;
+  }
+
+  function extract(hrefs: string[]) {
+    return extractClassworkPage({
+      document: pageWith(hrefs),
+      url: CLASSWORK_URL,
+      now: new Date(),
+    }).result.items;
+  }
+
+  it('keeps /a/ for an assignment link', () => {
+    const [item] = extract([`/c/${COURSE}/a/${WORK}/details`]);
+    expect(item?.kind).toBe('assignment');
+    expect(item?.canonicalUrl).toBe(
+      `https://classroom.google.com/c/${COURSE}/a/${WORK}/details`,
+    );
+  });
+
+  it('keeps /m/ for a material link', () => {
+    const [item] = extract([`/c/${COURSE}/m/${MATERIAL}/details`]);
+    expect(item?.kind).toBe('material');
+    expect(item?.canonicalUrl).toBe(
+      `https://classroom.google.com/c/${COURSE}/m/${MATERIAL}/details`,
+    );
+  });
+
+  it('never rewrites a material into an assignment URL', () => {
+    const [item] = extract([`/c/${COURSE}/m/${MATERIAL}/details`]);
+    expect(item?.canonicalUrl).not.toContain('/a/');
+  });
+
+  it('preserves the kind of each item in a mixed list', () => {
+    const items = extract([
+      `/c/${COURSE}/a/${WORK}/details`,
+      `/c/${COURSE}/m/${MATERIAL}/details`,
+    ]);
+    expect(items.map((item) => item.kind)).toEqual(['assignment', 'material']);
+    expect(items[0]?.canonicalUrl).toContain('/a/');
+    expect(items[1]?.canonicalUrl).toContain('/m/');
+  });
+
+  it('deduplicates by source id, keeping the first link seen', () => {
+    const items = extract([
+      `/c/${COURSE}/a/${WORK}/details`,
+      `/c/${COURSE}/a/${WORK}/details`,
+    ]);
+    expect(items).toHaveLength(1);
   });
 });

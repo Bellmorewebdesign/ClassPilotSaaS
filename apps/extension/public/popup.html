@@ -60,6 +60,7 @@
         <p class="progress-phase" id="progress-phase">
           Syncing Classroom&hellip;
         </p>
+        <p class="progress-mode" id="progress-mode"></p>
         <p class="progress-current" id="progress-current"></p>
 
         <div class="progress-row">
@@ -87,7 +88,23 @@
 
       <!-- Errors -->
       <section class="error" id="error" hidden role="alert">
-        <p id="error-message"></p>
+        <div>
+          <p class="error-title" id="error-title">Sync failed</p>
+          <p id="error-message"></p>
+        </div>
+      </section>
+
+      <!-- Recovery from an interrupted run -->
+      <section class="resume" id="resume" hidden>
+        <p class="resume-note" id="resume-note"></p>
+        <div class="actions">
+          <button type="button" id="resume-button" class="secondary">
+            Resume sync
+          </button>
+          <button type="button" id="restart-button" class="secondary">
+            Start again
+          </button>
+        </div>
       </section>
 
       <div class="actions">

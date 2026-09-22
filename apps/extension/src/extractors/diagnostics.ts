@@ -1,5 +1,10 @@
 import { parseClassroomUrl, toAbsoluteClassroomUrl } from '@classpilot/shared';
 import { cleanText, isAriaHidden, links, mainRegion } from './dom.js';
+import { probeReadiness, type ReadinessTarget } from './readiness.js';
+import { extractAssignmentPage } from './assignmentPage.js';
+import { extractClassroomHome } from './classroomHome.js';
+import { extractClassworkPage } from './classworkPage.js';
+import { extractStreamPage } from './streamPage.js';
 
 /**
  * Structural diagnostics.
@@ -21,7 +26,7 @@ import { cleanText, isAriaHidden, links, mainRegion } from './dom.js';
  * it clearly. Output with it on must not be shared.
  */
 
-export const DIAGNOSTICS_VERSION = '1.0.0';
+export const DIAGNOSTICS_VERSION = '1.1.0';
 
 export interface DiagnosticsOptions {
   /**
@@ -69,6 +74,35 @@ export interface StructureReport {
 
   /** Text blocks in main, by size, so we can see where the prose lives. */
   textBlocks: Array<{ tag: string; role: string | null; length: number; sample: string | null }>;
+
+  /**
+   * Whether this page is currently EXTRACTABLE, and which signals say so.
+   *
+   * This is the single most useful thing in the report when a sync comes back
+   * empty: it separates "the extractor cannot read this page" from "the page
+   * had not rendered yet".
+   */
+  readiness: {
+    target: ReadinessTarget | null;
+    state: string;
+    signals: Array<{ name: string; describes: string; found: boolean; count?: number }>;
+  } | null;
+
+  /**
+   * What the real extractor produces against this page, right now.
+   *
+   * COUNTS AND PROVENANCE ONLY - no titles, no bodies, no names. This is what
+   * turns "my sync found nothing" into "discovery found 7 items and the title
+   * strategy missed on all of them".
+   */
+  extraction: {
+    extractor: string;
+    version: string;
+    candidateCount: number;
+    /** Per-field: which named strategy won, or null if every one missed. */
+    provenance: Array<{ field: string; strategy: string | null; found: boolean }>;
+    warnings: string[];
+  } | null;
 }
 
 /** Generic UI words that are safe to report verbatim. */
@@ -105,6 +139,117 @@ export function captureStructure(
     ariaLabels: summarizeAriaLabels(main, includeText),
     strategyProbes: probeStrategies(document, main),
     textBlocks: summarizeTextBlocks(main, includeText),
+    readiness: captureReadiness(document, url, parsed.kind),
+    extraction: captureExtraction(document, url, parsed.kind),
+  };
+}
+
+/** Run the readiness probe for whichever page this is. */
+function captureReadiness(
+  document: Document,
+  url: string,
+  kind: string,
+): StructureReport['readiness'] {
+  const target: ReadinessTarget | null =
+    kind === 'home'
+      ? 'home'
+      : kind === 'class_classwork'
+        ? 'classwork'
+        : kind === 'assignment_detail' || kind === 'material_detail'
+          ? 'assignment'
+          : kind === 'class_stream'
+            ? 'stream'
+            : null;
+
+  if (target === null) return null;
+
+  const probe = probeReadiness(document, url, target);
+  return {
+    target,
+    state: probe.state ?? 'not_ready',
+    signals: probe.signals.map((signal) => ({
+      name: signal.name,
+      describes: signal.describes,
+      found: signal.found,
+      ...(signal.count === undefined ? {} : { count: signal.count }),
+    })),
+  };
+}
+
+/**
+ * Run the page's real extractor and report only its shape.
+ *
+ * The extraction report the framework already builds is content-free by
+ * design - it records which named strategy won for each field, never what it
+ * found - so it can be pasted into a bug report as it stands.
+ */
+function captureExtraction(
+  document: Document,
+  url: string,
+  kind: string,
+): StructureReport['extraction'] {
+  const context = { document, url, now: new Date() };
+
+  try {
+    switch (kind) {
+      case 'home': {
+        const { result, report } = extractClassroomHome(context);
+        return shapeOf(report, result.classes.length);
+      }
+      case 'class_classwork': {
+        const { result, report } = extractClassworkPage(context);
+        return shapeOf(report, result.items.length);
+      }
+      case 'class_stream': {
+        const { result, report } = extractStreamPage(context);
+        return shapeOf(report, result.announcements.length);
+      }
+      case 'assignment_detail':
+      case 'material_detail': {
+        /*
+         * This extractor returns the candidate and a failure reason rather
+         * than a report, so the shape is assembled from what it does expose.
+         * The candidate's own extraction report is content-free by design.
+         */
+        const { candidate, failureReason } = extractAssignmentPage(context);
+        return {
+          extractor: candidate?.extraction.extractor ?? 'assignmentPage',
+          version: candidate?.extraction.version ?? 'unknown',
+          candidateCount: candidate ? 1 : 0,
+          provenance: candidate?.extraction.provenance ?? [],
+          warnings: [
+            ...(candidate?.extraction.warnings ?? []),
+            ...(failureReason ? [`failed: ${failureReason}`] : []),
+          ],
+        };
+      }
+      default:
+        return null;
+    }
+  } catch (error) {
+    // A diagnostics capture must never be the thing that breaks.
+    return {
+      extractor: 'unknown',
+      version: '0',
+      candidateCount: 0,
+      provenance: [],
+      warnings: [
+        `extractor threw: ${error instanceof Error ? error.message : 'unknown'}`,
+      ],
+    };
+  }
+}
+
+function shapeOf(
+  report: { extractor: string; version: string; provenance: Array<{ field: string; strategy: string | null; found: boolean }>; warnings: string[] },
+  candidateCount: number,
+): NonNullable<StructureReport['extraction']> {
+  return {
+    extractor: report.extractor,
+    version: report.version,
+    candidateCount,
+    provenance: report.provenance,
+    warnings: report.warnings,
   };
 }
 
