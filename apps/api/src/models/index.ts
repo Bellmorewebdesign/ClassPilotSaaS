@@ -17,3 +17,8 @@ export {
   type AssignmentGradeAttrs,
 } from './Assignment.js';
 export { SyncRun, type SyncRunAttrs, type SyncRunDocument } from './SyncRun.js';
+export {
+  CalendarEvent,
+  type CalendarEventAttrs,
+  type CalendarEventDoc,
+} from './CalendarEvent.js';

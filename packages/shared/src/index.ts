@@ -10,6 +10,8 @@
 
 export * from './classroom/enums.js';
 export * from './classroom/urls.js';
+export * from './calendar/types.js';
+export * from './calendar/schemas.js';
 export * from './classroom/attachments.js';
 export * from './classroom/candidates.js';
 

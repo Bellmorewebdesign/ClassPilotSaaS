@@ -15,7 +15,14 @@ import { NextResponse, type NextRequest } from 'next/server';
 const SESSION_COOKIE = 'coursen_dev_session';
 
 /** Prefixes that require a session. */
-const PROTECTED = ['/dashboard', '/classes', '/assignments', '/integrations', '/welcome'];
+const PROTECTED = [
+  '/dashboard',
+  '/classes',
+  '/assignments',
+  '/calendar',
+  '/integrations',
+  '/welcome',
+];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

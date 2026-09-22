@@ -10,6 +10,7 @@ import type { AppEnv } from './config/env.js';
 import { isDatabaseConnected } from './db/connect.js';
 import { ApiError } from './lib/errors.js';
 import { registerAssignmentRoutes } from './routes/assignments.js';
+import { registerCalendarRoutes } from './routes/calendar.js';
 import { registerClassRoutes } from './routes/classes.js';
 import { registerDevRoutes } from './routes/dev.js';
 import { registerHealthRoutes } from './routes/health.js';
@@ -183,6 +184,7 @@ export async function buildServer(
   await registerMeRoutes(app);
   await registerClassRoutes(app);
   await registerAssignmentRoutes(app);
+  await registerCalendarRoutes(app);
   await registerSyncRoutes(app, env);
   await registerDevRoutes(app, env);
 

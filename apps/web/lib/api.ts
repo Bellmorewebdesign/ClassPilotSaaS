@@ -5,6 +5,7 @@ import type {
   MeDto,
   PaginatedDto,
   SyncStatusDto,
+  CalendarEventDto,
 } from '@classpilot/shared';
 
 /**
@@ -132,4 +133,9 @@ export const api = {
     get<AssignmentDto>(`/api/v1/assignments/${encodeURIComponent(id)}`),
 
   syncStatus: () => get<SyncStatusDto>('/api/v1/sync/status'),
+
+  calendar: (from: string, to: string) =>
+    get<{ events: CalendarEventDto[]; total: number }>(
+      `/api/v1/calendar/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+    ),
 };
