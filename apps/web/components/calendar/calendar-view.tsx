@@ -125,9 +125,10 @@ export function CalendarView({
           {WEEKDAYS.map((day) => (
             <div
               key={day}
-              className="px-2 py-2 text-center text-metadata font-medium text-muted-foreground"
+              className="px-1 py-2 text-center text-metadata font-medium text-muted-foreground"
             >
-              {day}
+              <span className="sm:hidden">{day.slice(0, 1)}</span>
+              <span className="hidden sm:inline">{day}</span>
             </div>
           ))}
         </div>
@@ -139,7 +140,7 @@ export function CalendarView({
               <div
                 key={day.iso}
                 className={cn(
-                  'min-h-[7rem] border-b border-r border-border p-1.5 last:border-r-0',
+                  'min-h-[3.25rem] border-b border-r border-border p-1.5 last:border-r-0 sm:min-h-[7rem]',
                   !day.inMonth && 'bg-background',
                 )}
               >
@@ -159,14 +160,29 @@ export function CalendarView({
                   <button
                     type="button"
                     onClick={() => setCreatingOn(day.iso)}
-                    className="rounded-sm p-0.5 text-muted-foreground opacity-0 transition-opacity duration-fast hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                    className="hidden rounded-sm px-1 text-muted-foreground transition-colors duration-fast hover:text-foreground sm:block"
                     aria-label={`Add an event on ${day.iso}`}
                   >
                     +
                   </button>
                 </div>
 
-                <ul className="space-y-1">
+                {/*
+                  Below `sm` a cell is about 50px wide, which truncates every
+                  title to a single letter. Dots say "something is on this
+                  day" honestly at that size, and the agenda underneath
+                  carries the detail.
+                */}
+                <ul className="flex flex-wrap gap-1 sm:hidden" aria-hidden="true">
+                  {dayEvents.slice(0, 4).map((event) => (
+                    <li
+                      key={event.id}
+                      className={cn('h-1.5 w-1.5 rounded-full', TYPE_STYLES[event.type].dot)}
+                    />
+                  ))}
+                </ul>
+
+                <ul className="hidden space-y-1 sm:block">
                   {dayEvents.slice(0, 3).map((event) => (
                     <li key={event.id}>
                       <EventChip event={event} onOpen={() => setEditing(event)} />
