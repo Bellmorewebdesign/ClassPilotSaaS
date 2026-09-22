@@ -21,6 +21,44 @@ export default {
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
+
+      /**
+       * The V2 type roles. Components choose a ROLE (`text-h2`), never a size,
+       * so the hierarchy stays consistent and a scale revision is a one-file
+       * change. Mobile steps are applied by a media query in globals.css.
+       */
+      fontSize: {
+        display: [
+          'var(--text-display)',
+          { lineHeight: 'var(--leading-display)', letterSpacing: 'var(--tracking-display)', fontWeight: 'var(--weight-display)' },
+        ],
+        h1: [
+          'var(--text-h1)',
+          { lineHeight: 'var(--leading-h1)', letterSpacing: 'var(--tracking-h1)', fontWeight: 'var(--weight-h1)' },
+        ],
+        h2: [
+          'var(--text-h2)',
+          { lineHeight: 'var(--leading-h2)', letterSpacing: 'var(--tracking-h2)', fontWeight: 'var(--weight-h2)' },
+        ],
+        h3: [
+          'var(--text-h3)',
+          { lineHeight: 'var(--leading-h3)', letterSpacing: 'var(--tracking-h3)', fontWeight: 'var(--weight-h3)' },
+        ],
+        body: ['var(--text-body)', { lineHeight: 'var(--leading-body)' }],
+        'small-body': ['var(--text-smallBody)', { lineHeight: 'var(--leading-smallBody)' }],
+        label: [
+          'var(--text-label)',
+          { lineHeight: 'var(--leading-label)', fontWeight: 'var(--weight-label)' },
+        ],
+        button: [
+          'var(--text-button)',
+          { lineHeight: 'var(--leading-button)', fontWeight: 'var(--weight-button)' },
+        ],
+        metadata: [
+          'var(--text-metadata)',
+          { lineHeight: 'var(--leading-metadata)', letterSpacing: 'var(--tracking-metadata)', fontWeight: 'var(--weight-metadata)' },
+        ],
+      },
       colors: {
         // --- existing semantic tokens: unchanged, the workspace depends on them
         background: 'hsl(var(--background))',
@@ -42,16 +80,31 @@ export default {
         ring: 'hsl(var(--ring))',
 
         // --- depth palette: marketing and auth surfaces
+        // The dark brand surface. Not a second palette: `base` is Main ink
+        // and `accent` is Signature sky, exactly as the kit's dark reveal.
         depth: {
           base: 'var(--depth-base)',
+          sunken: 'var(--depth-sunken)',
           raised: 'var(--depth-raised)',
-          panel: 'var(--depth-panel)',
           ink: 'var(--depth-ink)',
           muted: 'var(--depth-mutedInk)',
+          accent: 'var(--depth-accent)',
           line: 'var(--depth-line)',
           'line-strong': 'var(--depth-lineStrong)',
-          glow: 'var(--depth-glow)',
         },
+
+        // V2 roles that have no Tailwind semantic equivalent.
+        neutral: 'var(--brand-neutral)',
+        'action-hover': 'var(--brand-actionHover)',
+        sky: 'var(--brand-sky)',
+        success: 'var(--brand-success)',
+        'success-surface': 'var(--brand-successSurface)',
+        warning: 'var(--brand-warning)',
+        'warning-surface': 'var(--brand-warningSurface)',
+        'error-text': 'var(--brand-error)',
+        'error-surface': 'var(--brand-errorSurface)',
+        disabled: 'var(--brand-disabled)',
+        'disabled-fill': 'var(--brand-disabledFill)',
       },
       borderRadius: {
         sm: 'var(--radius-sm)',
@@ -74,64 +127,34 @@ export default {
         fast: 'var(--duration-fast)',
         base: 'var(--duration-base)',
         slow: 'var(--duration-slow)',
-        deliberate: 'var(--duration-deliberate)',
+        curve: 'var(--duration-curve)',
       },
       transitionTimingFunction: {
+        // The kit's reveal keySplines. There is deliberately no spring: V2
+        // motion is "smooth, brief, and easy to ignore" (guide page 33).
         out: 'var(--ease-out)',
         'in-out': 'var(--ease-inOut)',
-        spring: 'var(--ease-spring)',
       },
-      keyframes: {
-        // Entrances. Transform + opacity only, so these stay on the
-        // compositor and never trigger layout.
-        'rise-in': {
-          from: { opacity: '0', transform: 'translate3d(0, 14px, 0)' },
-          to: { opacity: '1', transform: 'translate3d(0, 0, 0)' },
-        },
-        'fade-in': {
-          from: { opacity: '0' },
-          to: { opacity: '1' },
-        },
-        'scale-in': {
-          from: { opacity: '0', transform: 'scale3d(0.96, 0.96, 1)' },
-          to: { opacity: '1', transform: 'scale3d(1, 1, 1)' },
-        },
-        // The hero: a packet travelling along a connector path.
-        'travel': {
-          '0%': { opacity: '0', offsetDistance: '0%' },
-          '12%': { opacity: '1' },
-          '88%': { opacity: '1' },
-          '100%': { opacity: '0', offsetDistance: '100%' },
-        },
-        // The Coursen mark drawing itself.
-        'trace': {
-          from: { strokeDashoffset: 'var(--trace-length)' },
-          to: { strokeDashoffset: '0' },
-        },
-        // A slow, barely-there drift for ambient background layers.
-        'drift': {
-          '0%, 100%': { transform: 'translate3d(0, 0, 0) scale(1)' },
-          '50%': { transform: 'translate3d(0, -12px, 0) scale(1.03)' },
-        },
-        // Loading shimmer for skeletons.
-        'shimmer': {
-          from: { transform: 'translate3d(-100%, 0, 0)' },
-          to: { transform: 'translate3d(100%, 0, 0)' },
-        },
-        // A single soft pulse on the mark when a sync lands.
-        'pulse-ring': {
-          '0%': { opacity: '0.5', transform: 'scale(0.9)' },
-          '70%': { opacity: '0', transform: 'scale(1.6)' },
-          '100%': { opacity: '0', transform: 'scale(1.6)' },
-        },
-      },
+      /*
+       * Keyframes live in app/globals.css, not here.
+       *
+       * Tailwind only emits a theme keyframe when a matching `animate-*`
+       * utility is generated. Several of these are driven by hand-written
+       * component classes (.mark-curve, .activity-sweep, the ambient washes)
+       * that Tailwind never sees, so declaring them here left those
+       * animations referencing keyframes that were never shipped - the logo
+       * reveal silently stayed at opacity 0. Defining them in the stylesheet
+       * emits them unconditionally; the `animation` utilities below still
+       * resolve to them by name.
+       */
       animation: {
         'rise-in': 'rise-in var(--duration-slow) var(--ease-out) both',
         'fade-in': 'fade-in var(--duration-base) var(--ease-out) both',
         'scale-in': 'scale-in var(--duration-base) var(--ease-out) both',
-        drift: 'drift 14s var(--ease-inOut) infinite',
+        drift: 'drift 18s var(--ease-inOut) infinite',
         shimmer: 'shimmer 1.6s var(--ease-inOut) infinite',
-        'pulse-ring': 'pulse-ring 2.4s var(--ease-out) infinite',
+        'activity-sweep': 'activity-sweep var(--duration-loop) linear infinite',
+        'activity-dot': 'activity-dot var(--duration-loop) var(--ease-inOut) infinite',
       },
     },
   },

@@ -1,11 +1,3 @@
-import {
-  AlarmClock,
-  Inbox,
-  ListChecks,
-  Megaphone,
-  NotebookPen,
-  Split,
-} from 'lucide-react';
 import { Reveal } from '@/components/motion/reveal';
 import { Section, SectionHeading } from '@/components/marketing/section';
 
@@ -18,32 +10,26 @@ import { Section, SectionHeading } from '@/components/marketing/section';
  */
 const PROBLEMS = [
   {
-    icon: Split,
     title: 'Six tabs, one class',
     body: 'Classwork in one place, the doc in another, the deadline somewhere else entirely.',
   },
   {
-    icon: AlarmClock,
     title: 'Deadlines that hide',
     body: 'Due dates live inside assignments you have to open one at a time to find.',
   },
   {
-    icon: Megaphone,
     title: 'Announcements that vanish',
     body: 'The one message about the test scrolls away under three weeks of posts.',
   },
   {
-    icon: Inbox,
     title: 'No single inbox',
     body: 'Nothing tells you what actually changed across your classes since yesterday.',
   },
   {
-    icon: NotebookPen,
     title: 'Context you rebuild daily',
     body: 'Every time you sit down you reconstruct where you were from scratch.',
   },
   {
-    icon: ListChecks,
     title: 'No honest "what is next"',
     body: 'Plenty of lists. None of them know what is urgent versus what just looks urgent.',
   },
@@ -71,17 +57,17 @@ export function ValueGrid() {
             step={((index % 3) + 1) as 1 | 2 | 3}
             className="lift rounded-xl border border-depth-line bg-white/[0.03] p-6 hover:border-depth-line-strong"
           >
-            <item.icon
-              className="h-5 w-5 text-depth-glow"
-              strokeWidth={1.75}
+            {/* "Order comes from alignment, not decoration" - the kit has no
+                iconography for problems, so these are numbered rather than
+                given approximate glyphs. */}
+            <span
               aria-hidden="true"
-            />
-            <h3 className="mt-4 text-[15px] font-semibold text-depth-ink">
-              {item.title}
-            </h3>
-            <p className="mt-2 text-[13px] leading-relaxed text-depth-muted">
-              {item.body}
-            </p>
+              className="text-metadata font-semibold tabular-nums text-depth-accent"
+            >
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <h3 className="mt-3 card-heading text-depth-ink">{item.title}</h3>
+            <p className="mt-2 text-small-body text-depth-muted">{item.body}</p>
           </Reveal>
         ))}
       </ul>

@@ -3,7 +3,7 @@ import { brand } from '@classpilot/shared';
 import { BrandMark } from '@/components/brand-logo';
 export default function NotFound() {
   return (
-    <section className="rounded-2xl border bg-card p-8">
+    <section className="rounded-lg border bg-card p-8">
       <BrandMark />
       <h1 className="mt-5 text-2xl font-semibold">
         This page is not in your workspace.

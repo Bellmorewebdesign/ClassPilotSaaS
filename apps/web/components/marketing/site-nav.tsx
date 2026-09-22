@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Menu, X } from 'lucide-react';
 import { brand } from '@classpilot/shared';
 import { BrandLogo } from '@/components/brand-logo';
 import { cn } from '@/lib/utils';
@@ -67,7 +66,7 @@ export function SiteNav() {
             <a
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-sm text-depth-muted transition-colors duration-fast ease-out hover:text-depth-ink"
+              className="rounded-md px-3 py-2 text-small-body text-depth-muted transition-colors duration-fast ease-out hover:text-depth-ink"
             >
               {item.label}
             </a>
@@ -77,13 +76,13 @@ export function SiteNav() {
         <div className="hidden items-center gap-2 md:flex">
           <Link
             href="/signin"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-depth-ink transition-colors duration-fast ease-out hover:text-depth-glow"
+            className="rounded-md px-3 py-2 text-button text-depth-ink transition-colors duration-fast ease-out hover:text-depth-accent"
           >
             Sign in
           </Link>
           <Link
             href="/signup"
-            className="inline-flex min-h-10 items-center rounded-xl bg-depth-ink px-4 text-sm font-semibold text-depth-base shadow-low transition-[transform,box-shadow] duration-fast ease-out hover:-translate-y-px hover:shadow-mid active:translate-y-0"
+            className="inline-flex min-h-10 items-center rounded-md bg-depth-ink px-4 text-button text-depth-base transition-colors duration-fast ease-out hover:bg-sky"
           >
             Get started
           </Link>
@@ -97,7 +96,7 @@ export function SiteNav() {
           aria-label={open ? 'Close menu' : 'Open menu'}
           className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-xl text-depth-ink md:hidden"
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {open ? <CloseGlyph /> : <MenuGlyph />}
         </button>
       </div>
 
@@ -129,7 +128,7 @@ export function SiteNav() {
             <Link
               href="/signup"
               onClick={() => setOpen(false)}
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-depth-ink px-4 text-sm font-semibold text-depth-base"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-md bg-depth-ink px-4 text-button text-depth-base"
             >
               Get started
             </Link>
@@ -137,5 +136,39 @@ export function SiteNav() {
         </nav>
       </div>
     </header>
+  );
+}
+
+/*
+ * The kit has no hamburger or close glyph - its icon set is content-facing.
+ * These are drawn to the same spec as the kit icons (24x24 frame, 1.8 stroke,
+ * rounded caps) so the nav toggle does not look like it came from elsewhere,
+ * and so the app carries no general-purpose icon dependency.
+ */
+function MenuGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+      <path
+        d="M4 7h16M4 12h16M4 17h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CloseGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

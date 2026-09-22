@@ -44,7 +44,7 @@ export function HowItWorks() {
             >
               <span
                 aria-hidden="true"
-                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-depth-line-strong bg-white/[0.04] text-[13px] font-bold tabular-nums text-depth-glow"
+                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-depth-line-strong bg-white/[0.04] text-[13px] font-bold tabular-nums text-depth-accent"
               >
                 {index + 1}
               </span>

@@ -62,7 +62,11 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('branded popup keeps the existing extension protocol', () => {
   it('hydrates connection state and sends the unchanged sync request', async () => {
-    expect(document.querySelector('h1')?.textContent).toBe(brand.extensionName);
+    // The header is the official Brand Kit v2 Sync lockup, not a hand-set
+    // approximation. Its alt text still carries the accessible name.
+    const lockup = document.querySelector<HTMLImageElement>('h1 img.lockup');
+    expect(lockup?.getAttribute('src')).toBe('coursen-sync.svg');
+    expect(lockup?.alt).toBe(brand.extensionName);
     await vi.waitFor(() =>
       expect(element('status-connection').textContent).toContain(
         'student@example.test',

@@ -1,10 +1,6 @@
 import Link from 'next/link';
-import {
-  ArrowUpRight,
-  CalendarDays,
-  CircleAlert,
-  PanelsTopLeft,
-} from 'lucide-react';
+import { ClassBadge } from '@/components/class-badge';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { brand } from '@classpilot/shared';
 import type { AssignmentDto, PaginatedDto } from '@classpilot/shared';
 import { api } from '@/lib/api';
@@ -61,16 +57,23 @@ export default async function DashboardPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="eyebrow mb-2">Your overview</p>
-          <h1 className="page-heading">Know what&apos;s next.</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Your coursework, with a little more clarity.
+          <h1 className="page-heading">{brand.tagline}</h1>
+          {/* The kit's dashboard leads with the date - it is the cheapest
+              possible answer to "what matters right now". */}
+          <p className="mt-2 text-body text-muted-foreground">
+            {now.toLocaleDateString(undefined, {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+            })}
           </p>
         </div>
         {activeSync ? (
           <Badge variant="secondary">Sync in progress…</Badge>
         ) : (
           <Link href="/integrations" className="quiet-link">
-            Sync setup <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            Sync setup
+            <CoursenIcon name="arrow" className="h-4 w-4" />
           </Link>
         )}
       </div>
@@ -87,23 +90,23 @@ export default async function DashboardPage() {
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
-              label="Due in the next 7 days"
+              label="Upcoming"
               value={upcoming.ok ? upcoming.data.total : null}
-              detail="Across all synced statuses"
-              icon={<CalendarDays className="h-5 w-5" />}
+              detail="Next 7 days, after today"
+              icon={<CoursenIcon name="calendar" className="h-5 w-5" />}
             />
             <StatCard
-              label="Marked missing"
+              label="Missing"
               value={missing.ok ? missing.data.total : null}
-              detail="As reported by Classroom"
-              icon={<CircleAlert className="h-5 w-5" />}
+              detail="As marked in Classroom"
+              icon={<CoursenIcon name="attention" className="h-5 w-5" />}
             />
             <StatCard
               label="Your classes"
               value={classes.data.total}
-              detail="Together in your workspace"
+              detail="Synced from Classroom"
               href="/classes"
-              icon={<PanelsTopLeft className="h-5 w-5" />}
+              icon={<CoursenIcon name="classes" className="h-5 w-5" />}
             />
           </div>
           <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,1fr)]">
@@ -135,15 +138,14 @@ export default async function DashboardPage() {
                     <Link
                       key={klass.id}
                       href={`/classes/${klass.id}`}
-                      className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary/40"
+                      className="rounded-lg border bg-card p-5 transition-colors hover:border-primary/40"
                     >
-                      <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary">
-                        <PanelsTopLeft className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                      <h3 className="break-words text-sm font-semibold">
+                      {/* The kit identifies a class by a two-letter tile. */}
+                      <ClassBadge name={klass.name} className="mb-4" />
+                      <h3 className="break-words text-h3 text-foreground">
                         {klass.name}
                       </h3>
-                      <p className="mt-2 text-xs text-muted-foreground">
+                      <p className="mt-2 text-small-body text-muted-foreground">
                         {klass.assignmentCount}{' '}
                         {klass.assignmentCount === 1 ? 'item' : 'items'} synced
                       </p>
@@ -151,7 +153,7 @@ export default async function DashboardPage() {
                   ))}
                 </div>
               </section>
-              <details className="rounded-2xl border bg-card p-5">
+              <details className="rounded-lg border bg-card p-5">
                 <summary className="text-sm font-semibold">
                   Recently synced coursework
                 </summary>
@@ -303,7 +305,7 @@ function CourseworkSection({
           ) : null}
         </>
       ) : (
-        <div className="rounded-2xl border bg-card p-7">
+        <div className="rounded-lg border bg-card p-7">
           <p className="text-sm font-medium">{empty}</p>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
             This reflects your last sync. Some coursework may not show a due
@@ -341,17 +343,19 @@ function StatCard({
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-4xl font-semibold tabular-nums tracking-tight">
-          {value ?? '—'}
-        </p>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          {value === null ? 'Could not load this count' : detail}
-        </p>
+        {/* Kit tile: the number carries the weight, the detail sits beside
+            it rather than beneath, so the tile stays short. */}
+        <div className="flex items-baseline gap-3">
+          <p className="text-h1 tabular-nums text-foreground">{value ?? '—'}</p>
+          <p className="text-small-body text-muted-foreground">
+            {value === null ? 'Could not load this count' : detail}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
   return href ? (
-    <Link href={href} className="rounded-2xl">
+    <Link href={href} className="rounded-lg">
       {content}
     </Link>
   ) : (

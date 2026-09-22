@@ -1,20 +1,22 @@
 import Link from 'next/link';
 import type { AssignmentDto } from '@classpilot/shared';
-import { Badge } from '@/components/ui/badge';
 import {
   formatDateTime,
-  formatRelative,
   formatStatus,
-  formatType,
   isDueSoon,
   isOverdue,
 } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 /**
- * One assignment in a list.
+ * One assignment, following the kit's component sheet exactly:
  *
- * Shows the class name only when the list spans classes; inside a single
- * class page it would be noise on every row.
+ *   title first, class second, precise due date and source status next,
+ *   status badge bottom-right.
+ *
+ * Deliberately absent, per the same sheet: "No decorative grade claims or
+ * completion controls." A grade is shown only where the source actually
+ * reported one, and there is no checkbox pretending Coursen can mark work done.
  */
 export function AssignmentRow({
   assignment,
@@ -28,77 +30,75 @@ export function AssignmentRow({
     isOverdue(assignment.dueAt) &&
     assignment.status !== 'submitted' &&
     assignment.status !== 'returned';
-  const soon = isDueSoon(assignment.dueAt);
 
   return (
     <Link
       href={`/assignments/${assignment.id}`}
-      className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-secondary/30"
+      className="block rounded-lg border bg-card p-4 transition-colors duration-fast ease-out hover:border-primary/40 sm:p-5"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <p className="break-words text-sm font-semibold">
-            {assignment.title}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {showClass && assignment.className
-              ? `${assignment.className} · `
-              : ''}
-            {formatType(assignment.assignmentType)}
-            {assignment.topic ? ` · ${assignment.topic}` : ''}
-          </p>
-        </div>
+      <p className="break-words text-h3 text-foreground">{assignment.title}</p>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+      {showClass && assignment.className ? (
+        <p className="mt-1 truncate text-small-body text-muted-foreground">
+          {assignment.className}
+        </p>
+      ) : null}
+
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+        <p
+          className={cn(
+            'text-small-body',
+            overdue ? 'text-error-text' : 'text-muted-foreground',
+          )}
+        >
+          {due ? (
+            <>
+              Due {due}
+              {isDueSoon(assignment.dueAt) && !overdue ? ' · soon' : ''}
+            </>
+          ) : (
+            (assignment.dueLabel ?? 'No due date in Classroom')
+          )}
+        </p>
+
+        <div className="flex shrink-0 items-center gap-2">
           {assignment.pointsPossible !== null ? (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-metadata text-muted-foreground">
               {assignment.pointsPossible} pts
             </span>
           ) : null}
-
+          {/* Only shown when Classroom actually reported a grade. */}
           {assignment.grade?.raw ? (
-            <Badge variant="secondary">{assignment.grade.raw}</Badge>
+            <span className="rounded-full bg-success-surface px-2.5 py-1 text-metadata font-semibold text-success">
+              {assignment.grade.raw}
+            </span>
           ) : null}
-
-          <Badge
-            variant={
-              assignment.status === 'missing' ? 'destructive' : 'outline'
-            }
-          >
-            {formatStatus(assignment.status)}
-          </Badge>
+          <StatusBadge status={assignment.status} />
         </div>
       </div>
-
-      <p className="mt-2 text-xs">
-        {due ? (
-          <span
-            className={
-              overdue
-                ? 'text-destructive'
-                : soon
-                  ? 'text-accent'
-                  : 'text-muted-foreground'
-            }
-          >
-            Due {due}
-            {formatRelative(assignment.dueAt)
-              ? ` · ${formatRelative(assignment.dueAt)}`
-              : ''}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">
-            {assignment.dueLabel ?? 'No due date shown in Classroom'}
-          </span>
-        )}
-        {assignment.attachments.length > 0 ? (
-          <span className="text-muted-foreground">
-            {' · '}
-            {assignment.attachments.length}{' '}
-            {assignment.attachments.length === 1 ? 'attachment' : 'attachments'}
-          </span>
-        ) : null}
-      </p>
     </Link>
+  );
+}
+
+/**
+ * Status pill.
+ *
+ * "Meaning comes with words and shape" (guide page 18): each status carries
+ * its own surface AND its own word, so it never relies on colour alone.
+ */
+export function StatusBadge({ status }: { status: AssignmentDto['status'] }) {
+  return (
+    <span
+      className={cn(
+        'shrink-0 rounded-full px-2.5 py-1 text-metadata font-semibold',
+        status === 'missing' && 'bg-error-surface text-error-text',
+        status === 'returned' && 'bg-success-surface text-success',
+        status === 'submitted' && 'bg-success-surface text-success',
+        status === 'assigned' && 'bg-secondary text-primary',
+        status === 'unknown' && 'bg-neutral text-muted-foreground',
+      )}
+    >
+      {formatStatus(status)}
+    </span>
   );
 }

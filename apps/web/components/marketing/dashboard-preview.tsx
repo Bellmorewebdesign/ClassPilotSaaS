@@ -1,4 +1,4 @@
-import { CircleAlert, CalendarClock, PanelsTopLeft } from 'lucide-react';
+import { CoursenIcon, type CoursenIconName } from '@/components/coursen-icon';
 import { Reveal } from '@/components/motion/reveal';
 import { Section, SectionHeading } from '@/components/marketing/section';
 import { DEMO_ASSIGNMENTS } from '@/app/(marketing)/_data/demo';
@@ -21,24 +21,20 @@ export function DashboardPreview() {
       />
 
       <Reveal step={1} className="mt-14">
-        <div className="glass-dark overflow-hidden rounded-2xl p-3 sm:p-5">
+        <div className="glass-dark overflow-hidden rounded-lg p-3 sm:p-5">
           {/* Summary tiles */}
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { label: 'Due today', value: '2', icon: CalendarClock },
-              { label: 'Missing', value: '1', icon: CircleAlert },
-              { label: 'Classes', value: '6', icon: PanelsTopLeft },
+              { label: 'Today', value: '2', icon: 'clock' as CoursenIconName },
+              { label: 'Missing', value: '1', icon: 'attention' as CoursenIconName },
+              { label: 'Classes', value: '6', icon: 'classes' as CoursenIconName },
             ].map((tile) => (
               <div
                 key={tile.label}
                 className="rounded-xl border border-depth-line bg-white/[0.03] p-4"
               >
                 <div className="flex items-center gap-2">
-                  <tile.icon
-                    className="h-4 w-4 text-depth-muted"
-                    strokeWidth={1.75}
-                    aria-hidden="true"
-                  />
+                  <CoursenIcon name={tile.icon} className="h-4 w-4 text-depth-muted" />
                   <span className="text-[12px] font-medium text-depth-muted">
                     {tile.label}
                   </span>

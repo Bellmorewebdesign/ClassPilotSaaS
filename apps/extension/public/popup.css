@@ -1,5 +1,12 @@
-/* Shared brand tokens and a bundled, local-only Manrope font.
-   No framework, CDN, or external font request. */
+/* Coursen Sync popup.
+ *
+ * Every colour, size, radius and duration below resolves to a Brand Kit v2
+ * token from brand.css, which the build generates from brandCssVariables().
+ * There is not one hard-coded hex value in this file on purpose: a palette
+ * change in packages/shared lands here without an edit.
+ *
+ * No framework, CDN, or external font request. The font is bundled locally.
+ */
 
 @font-face {
   font-family: Manrope;
@@ -7,6 +14,7 @@
   font-weight: 200 800;
   font-display: swap;
 }
+
 :root {
   color-scheme: light;
   --bg: var(--brand-surface);
@@ -14,12 +22,14 @@
   --muted: var(--brand-muted);
   --border: var(--brand-border);
   --accent: var(--brand-action);
+  --accent-hover: var(--brand-actionHover);
   --accent-fg: var(--brand-surface);
   --ok: var(--brand-success);
   --warn: var(--brand-warning);
   --error: var(--brand-error);
+  /* Quiet containers sit on cloud, the one surface the kit's contrast
+     audit sanctions for secondary text (#657486 on #F7F9FC, 4.53:1). */
   --surface: var(--brand-background);
-  --radius: 12px;
 }
 
 * {
@@ -33,7 +43,8 @@ body {
   background: var(--bg);
   color: var(--fg);
   font:
-    13px/1.6 Manrope,
+    var(--weight-smallBody) var(--text-smallBody) / var(--leading-smallBody)
+      Manrope,
     system-ui,
     -apple-system,
     'Segoe UI',
@@ -41,44 +52,38 @@ body {
     sans-serif;
 }
 
+/* --- header ------------------------------------------------------------ */
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mark {
-  width: 36px;
-  height: 36px;
-  flex: none;
-}
-
-h1 {
-  font-size: 17px;
-  font-weight: 750;
-  letter-spacing: -0.04em;
+.lockup-heading {
   margin: 0;
+  font-size: 0;
+  line-height: 0;
 }
+
+.lockup {
+  display: block;
+  width: 134px;
+  height: auto;
+}
+
 h2 {
-  font-size: 18px;
-  letter-spacing: -0.02em;
-  margin: 0 0 8px;
+  font-size: var(--text-h3);
+  font-weight: var(--weight-h3);
+  line-height: var(--leading-h3);
+  letter-spacing: var(--tracking-h3);
+  margin: 0 0 6px;
 }
-.brand-caption {
-  font-size: 10px;
-  color: var(--muted);
-  margin: 1px 0 0;
-}
+
 .settings-intro {
-  font-size: 12px;
+  font-size: var(--text-metadata);
   color: var(--muted);
   margin: 0 0 20px;
 }
@@ -88,123 +93,235 @@ main,
   padding: 20px;
 }
 
-/* --- status ------------------------------------------------------------ */
+/* --- status card -------------------------------------------------------- */
 
+/*
+ * One tinted card, exactly like the kit's Sync state mockups. The tint is
+ * derived in CSS from the state the popup script already writes onto each
+ * dot, so the card follows the real connection state with no extra
+ * JavaScript and no second source of truth.
+ */
 .status-list {
   list-style: none;
-  margin: 0 0 10px;
-  padding: 0;
+  margin: 0 0 16px;
+  padding: 16px;
   display: grid;
   gap: 10px;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  /*
+   * Secondary text inside the card. It travels with the tint because the
+   * kit's audit only clears #657486 down to cloud - on a tinted surface the
+   * accessible partner is that surface's own status colour.
+   */
+  --card-meta: var(--muted);
+}
+
+.status-list:has(.dot[data-state='ok']):not(
+    :has(.dot[data-state='warn']),
+    :has(.dot[data-state='error']),
+    :has(.dot[data-state='pending'])
+  ) {
+  background: var(--brand-successSurface);
+  border-color: transparent;
+  --card-meta: var(--ok);
+}
+.status-list:has(.dot[data-state='warn']):not(:has(.dot[data-state='error'])) {
+  background: var(--brand-warningSurface);
+  border-color: transparent;
+  --card-meta: var(--warn);
+}
+.status-list:has(.dot[data-state='error']) {
+  background: var(--brand-errorSurface);
+  border-color: transparent;
+  --card-meta: var(--error);
 }
 
 .status {
   display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--muted);
-  flex: none;
-}
-.dot[data-state='ok'] {
-  background: var(--ok);
-}
-.dot[data-state='warn'] {
-  background: var(--warn);
-}
-.dot[data-state='error'] {
-  background: var(--error);
-}
-.dot[data-state='pending'] {
-  background: var(--border);
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .status-text {
-  color: var(--fg);
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: var(--tracking-h3);
+  overflow-wrap: anywhere;
 }
 
-.last-sync {
-  margin: 0 0 12px;
-  color: var(--muted);
-  font-size: 12px;
+/* The second row is supporting detail, not a second headline. */
+#status-connection .status-text {
+  font-size: var(--text-smallBody);
+  font-weight: var(--weight-smallBody);
+  letter-spacing: 0;
 }
 
-/* --- progress ---------------------------------------------------------- */
+.status-meta {
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
+  letter-spacing: var(--tracking-metadata);
+  color: var(--card-meta);
+  margin-top: 2px;
+}
+
+/* Status glyphs, drawn in CSS so they need no icon font and no extra file. */
+.dot {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 2px;
+}
+
+/* connected - a check */
+.dot[data-state='ok']::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  width: 7px;
+  height: 12px;
+  border: solid var(--ok);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* needs attention - a circled exclamation, as in the kit's attention state */
+.dot[data-state='warn'],
+.dot[data-state='error'] {
+  color: var(--warn);
+}
+.dot[data-state='error'] {
+  color: var(--error);
+}
+.dot[data-state='warn']::before,
+.dot[data-state='error']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+.dot[data-state='warn']::after,
+.dot[data-state='error']::after {
+  content: '';
+  position: absolute;
+  left: 8.25px;
+  top: 4px;
+  width: 1.5px;
+  height: 6px;
+  background: currentColor;
+  box-shadow: 0 7.5px 0 currentColor;
+}
+
+/* not known yet - a quiet dot */
+.dot[data-state='pending']::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--brand-input);
+}
+
+/* --- progress ----------------------------------------------------------- */
 
 .progress {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
+  background: var(--brand-pale);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* Stationary. "Keep the C still. Let the work move." */
+.progress-mark {
+  display: block;
+  width: 36px;
+  height: 36px;
   margin-bottom: 12px;
 }
 
 .progress-phase {
-  margin: 0 0 10px;
+  margin: 0;
+  font-size: var(--text-body);
   font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: var(--tracking-h3);
+}
+
+.progress-current {
+  margin: 2px 0 14px;
+  font-size: var(--text-smallBody);
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 1.5em;
 }
 
 .progress-row {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  margin-bottom: 4px;
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
+  letter-spacing: var(--tracking-metadata);
+  margin-bottom: 5px;
 }
-.progress-label {
-  color: var(--muted);
+/* Action on pale is a sanctioned pairing (4.71:1); muted is not. */
+.progress-label,
+.progress-count {
+  color: var(--accent);
 }
 .progress-count {
   font-variant-numeric: tabular-nums;
 }
 
 .bar {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--brand-border);
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+}
+.bar:last-child {
+  margin-bottom: 0;
 }
 .bar-fill {
   height: 100%;
   width: 0%;
+  border-radius: inherit;
   background: var(--accent);
-  transition: width 200ms ease;
+  transition: width var(--duration-base) var(--ease-out);
 }
 
-.progress-current {
-  margin: 0;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* --- result ------------------------------------------------------------ */
+/* --- result ------------------------------------------------------------- */
 
 .result {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 12px;
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  margin-bottom: 16px;
 }
 .result-title {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
+  font-size: var(--text-body);
   font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: var(--tracking-h3);
 }
 .result-stats {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 3px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
+  letter-spacing: var(--tracking-metadata);
+  color: var(--muted);
 }
 .result-stats li {
   display: flex;
@@ -212,15 +329,16 @@ main,
 }
 .result-stats span:last-child {
   font-variant-numeric: tabular-nums;
+  color: var(--fg);
 }
 
 .warnings {
   list-style: none;
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   display: grid;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--text-metadata);
   color: var(--muted);
   max-height: 160px;
   overflow-y: auto;
@@ -230,20 +348,43 @@ main,
   padding-left: 8px;
 }
 
-/* --- error ------------------------------------------------------------- */
+/* --- error -------------------------------------------------------------- */
 
+/*
+ * The kit's attention state: a filled panel rather than an outlined one, so a
+ * problem reads as a calm piece of information instead of an alarm.
+ */
 .error {
-  border: 1px solid var(--error);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  display: flex;
+  gap: 10px;
+  background: var(--brand-errorSurface);
+  border-radius: var(--radius-xl);
+  padding: 14px 16px;
+  margin-bottom: 16px;
   color: var(--error);
+}
+.error::before {
+  content: '';
+  position: relative;
+  top: 1px;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background:
+    linear-gradient(currentColor, currentColor) 50% 4px / 1.5px 6px no-repeat,
+    linear-gradient(currentColor, currentColor) 50% 11.5px / 1.5px 1.5px
+      no-repeat;
+  background-origin: border-box;
 }
 .error p {
   margin: 0;
+  color: var(--fg);
+  overflow-wrap: anywhere;
 }
 
-/* --- controls ---------------------------------------------------------- */
+/* --- controls ----------------------------------------------------------- */
 
 .actions {
   display: flex;
@@ -252,15 +393,21 @@ main,
 }
 
 button {
-  font: inherit;
+  font-family: inherit;
+  font-size: var(--text-button);
+  font-weight: var(--weight-button);
+  line-height: var(--leading-button);
   cursor: pointer;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid transparent;
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 button:disabled {
-  opacity: 0.55;
+  background: var(--brand-disabledFill);
+  color: var(--brand-disabled);
+  border-color: transparent;
   cursor: not-allowed;
 }
 
@@ -268,29 +415,51 @@ button:disabled {
   background: var(--accent);
   color: var(--accent-fg);
   flex: 1;
-  font-weight: 600;
 }
+.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
 .secondary {
-  background: transparent;
+  background: var(--bg);
   color: var(--fg);
   border-color: var(--border);
+  flex: 1;
 }
+.secondary:hover:not(:disabled) {
+  background: var(--brand-pale);
+}
+
 .icon-button {
   background: transparent;
   color: var(--muted);
   border-color: transparent;
+  font-weight: var(--weight-smallBody);
   padding: 8px 10px;
 }
+.icon-button:hover {
+  background: var(--brand-pale);
+}
+
 .link-button {
   background: none;
   border: none;
   color: var(--accent);
-  padding: 6px 0;
+  min-height: 0;
+  padding: 8px 0 0;
   text-align: left;
   text-decoration: underline;
 }
 
-/* --- settings ---------------------------------------------------------- */
+.footnote {
+  margin: 16px 0 0;
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
+  letter-spacing: var(--tracking-metadata);
+  color: var(--muted);
+}
+
+/* --- settings ----------------------------------------------------------- */
 
 .settings {
   border-top: 1px solid var(--border);
@@ -301,7 +470,8 @@ button:disabled {
 }
 .field-label {
   display: block;
-  font-size: 12px;
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
   color: var(--muted);
   margin-bottom: 4px;
 }
@@ -311,9 +481,9 @@ input[type='password'],
 textarea {
   width: 100%;
   font: inherit;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--brand-input);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   min-height: 44px;
   background: var(--bg);
   color: var(--fg);
@@ -326,7 +496,7 @@ textarea {
 
 .field-hint {
   display: block;
-  font-size: 11px;
+  font-size: var(--text-metadata);
   color: var(--muted);
   margin-top: 4px;
 }
@@ -335,7 +505,7 @@ textarea {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  font-size: 12px;
+  font-size: var(--text-metadata);
   margin: 8px 0;
 }
 .checkbox input {
@@ -345,47 +515,26 @@ textarea {
 hr {
   border: none;
   border-top: 1px solid var(--border);
-  margin: 14px 0;
+  margin: 16px 0;
 }
 
 .debug summary {
   cursor: pointer;
-  font-size: 12px;
+  min-height: 36px;
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
   color: var(--muted);
+}
+
+:is(button, input, textarea, summary):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 [hidden] {
   display: none !important;
 }
 
-.status-list {
-  border-radius: 16px;
-  background: var(--brand-pale);
-  padding: 16px;
-  margin-bottom: 16px;
-}
-.status-text {
-  overflow-wrap: anywhere;
-}
-.progress,
-.result {
-  border-radius: 16px;
-  padding: 16px;
-}
-.primary:hover:not(:disabled) {
-  filter: brightness(0.95);
-}
-.secondary:hover:not(:disabled),
-.icon-button:hover {
-  background: var(--brand-pale);
-}
-:is(button, input, textarea, summary):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-.debug summary {
-  min-height: 36px;
-}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

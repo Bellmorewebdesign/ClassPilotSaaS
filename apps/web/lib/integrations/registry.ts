@@ -1,11 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
-import {
-  CalendarDays,
-  FileText,
-  FolderOpen,
-  GraduationCap,
-} from 'lucide-react';
 import { brand } from '@classpilot/shared';
+import type { CoursenIconName } from '@/components/coursen-icon';
 
 /**
  * The integration registry.
@@ -41,7 +35,7 @@ export interface IntegrationDefinition {
   summary: string;
   /** What it will do once connected. Shown in the detail area. */
   capabilities: string[];
-  icon: LucideIcon;
+  icon: CoursenIconName;
   /** Accent used for the icon tile. Kept to brand-adjacent hues. */
   tint: string;
   /**
@@ -63,8 +57,8 @@ export const INTEGRATIONS: readonly IntegrationDefinition[] = [
       'Read assignments, due dates and points',
       'Track turned in, missing and returned work',
     ],
-    icon: GraduationCap,
-    tint: 'text-[#7FB2F0]',
+    icon: 'classes',
+    tint: 'text-primary',
     implemented: true,
     method: `${brand.extensionName} reads Classroom from your signed-in browser session.`,
   },
@@ -77,8 +71,8 @@ export const INTEGRATIONS: readonly IntegrationDefinition[] = [
       'See coursework beside classes and activities',
       'Spot the week where three things land at once',
     ],
-    icon: CalendarDays,
-    tint: 'text-[#8FD3C1]',
+    icon: 'calendar',
+    tint: 'text-muted-foreground',
     implemented: false,
     method: 'Will connect through your Google account.',
   },
@@ -91,8 +85,8 @@ export const INTEGRATIONS: readonly IntegrationDefinition[] = [
       'Find the handout you were given three weeks ago',
       'Keep coursework files beside the work itself',
     ],
-    icon: FolderOpen,
-    tint: 'text-[#E3B7F0]',
+    icon: 'file',
+    tint: 'text-muted-foreground',
     implemented: false,
     method: 'Will connect through your Google account, folder by folder.',
   },
@@ -105,8 +99,8 @@ export const INTEGRATIONS: readonly IntegrationDefinition[] = [
       'See which draft belongs to which assignment',
       'Pick up where you left off',
     ],
-    icon: FileText,
-    tint: 'text-[#F0C98A]',
+    icon: 'assignment',
+    tint: 'text-muted-foreground',
     implemented: false,
     method: 'Will connect through your Google account.',
   },

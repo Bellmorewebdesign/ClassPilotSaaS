@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ArrowUpRight, Plug } from 'lucide-react';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { brand } from '@classpilot/shared';
 import { api } from '@/lib/api';
 import { IntegrationCard } from '@/components/integrations/integration-card';
@@ -66,7 +66,7 @@ export default async function IntegrationsPage() {
                       className="inline-flex min-h-10 items-center gap-1.5 text-[13px] font-semibold text-primary underline underline-offset-4"
                     >
                       View synced classes
-                      <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      <CoursenIcon name="arrow" className="h-3.5 w-3.5" />
                     </Link>
                   ) : (
                     <button
@@ -74,7 +74,7 @@ export default async function IntegrationsPage() {
                       disabled
                       className="inline-flex min-h-10 w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 text-[13px] font-semibold text-muted-foreground"
                     >
-                      <Plug className="h-3.5 w-3.5" aria-hidden="true" />
+                      <CoursenIcon name="source" className="h-3.5 w-3.5" />
                       Connect
                     </button>
                   )
@@ -93,11 +93,7 @@ export default async function IntegrationsPage() {
             {INTEGRATIONS.map((definition) => (
               <div key={definition.id}>
                 <dt className="flex items-center gap-2 text-[13px] font-semibold">
-                  <definition.icon
-                    className={`h-4 w-4 ${definition.tint}`}
-                    strokeWidth={1.75}
-                    aria-hidden="true"
-                  />
+                  <CoursenIcon name={definition.icon} className={`h-4 w-4 ${definition.tint}`} />
                   {definition.name}
                 </dt>
                 <dd>

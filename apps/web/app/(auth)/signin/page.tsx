@@ -20,14 +20,14 @@ export default async function SignInPage({
 
   return (
     <AuthCard
-      title={`Sign in to ${brand.shortName}`}
-      lede="Open your workspace and pick up where your coursework left off."
+      title="Welcome back."
+      lede="Sign in to your workspace."
       footer={
         <>
           New to {brand.shortName}?{' '}
           <Link
             href="/signup"
-            className="font-semibold text-depth-ink underline underline-offset-4"
+            className="font-semibold text-primary underline underline-offset-4"
           >
             Get started
           </Link>
@@ -38,11 +38,11 @@ export default async function SignInPage({
         <SignInForm next={next} />
 
         <div className="flex items-center gap-3" aria-hidden="true">
-          <span className="h-px flex-1 bg-depth-line" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-depth-muted">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-metadata uppercase tracking-[0.1em] text-muted-foreground">
             Or
           </span>
-          <span className="h-px flex-1 bg-depth-line" />
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <GoogleButtonPreview label="Continue with Google" />

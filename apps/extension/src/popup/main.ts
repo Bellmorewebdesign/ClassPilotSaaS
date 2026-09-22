@@ -139,7 +139,7 @@ function renderSummary(summary: SyncSummary): void {
 
   ui.resultTitle.textContent = hasWarnings
     ? 'Sync complete with warnings'
-    : 'Sync complete ✓';
+    : 'Sync complete';
 
   ui.resultStats.replaceChildren(
     statRow('Classes', summary.classes),
@@ -188,7 +188,7 @@ function render(state: ExtensionState): void {
     ui.statusClassroom,
     state.classroomDetected ? 'ok' : 'warn',
     state.classroomDetected
-      ? 'Classroom detected ✓'
+      ? 'Google Classroom is open'
       : 'Open Google Classroom to sync',
   );
 

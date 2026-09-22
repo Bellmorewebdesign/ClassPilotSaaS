@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { brand } from '@classpilot/shared';
+import { CoursenIcon } from '@/components/coursen-icon';
 import { ProductDemo } from '@/components/marketing/product-demo';
 import { Reveal } from '@/components/motion/reveal';
 
@@ -23,24 +23,29 @@ export function Hero() {
         <div className="min-w-0 max-w-xl">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-depth-line bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-depth-muted">
-              <span className="h-1.5 w-1.5 rounded-full bg-depth-glow" aria-hidden="true" />
+              <span className="h-1.5 w-1.5 rounded-full bg-depth-accent" aria-hidden="true" />
               Early preview
             </span>
           </Reveal>
 
           <Reveal step={1}>
+            {/*
+              The kit's brand line leads. The explanatory sentence beneath it
+              does the product work - "Do not sacrifice product clarity for
+              minimalism" - so a visitor learns what Coursen is within a few
+              seconds without the headline having to carry the whole job.
+            */}
             <h1 className="display-heading mt-6 text-depth-ink">
-              Everything for school.
-              <br />
-              <span className="text-depth-glow">Finally connected.</span>
+              {brand.tagline}
             </h1>
+            <p className="mt-4 text-h3 text-depth-accent">{brand.positioning}</p>
           </Reveal>
 
           <Reveal step={2}>
-            <p className="mt-6 max-w-lg text-[17px] leading-relaxed text-depth-muted">
+            <p className="mt-6 max-w-lg text-body text-depth-muted">
               {brand.shortName} brings your classes, assignments, deadlines,
-              documents and announcements into one workspace that actually
-              understands what is going on in your school week.
+              announcements, documents and schedule into one workspace - so
+              you can see what is actually coming, not go looking for it.
             </p>
           </Reveal>
 
@@ -48,23 +53,22 @@ export function Hero() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/signup"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-depth-ink px-6 text-[15px] font-semibold text-depth-base shadow-mid transition-[transform,box-shadow] duration-fast ease-out hover:-translate-y-0.5 hover:shadow-high active:translate-y-0"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-depth-ink px-6 text-button text-depth-base transition-colors duration-fast ease-out hover:bg-sky"
               >
                 Get started
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <CoursenIcon name="arrow" className="h-4 w-4" />
               </Link>
-              <a href="#how-it-works" className="quiet-link min-h-12 px-6 text-[15px]">
+              <a href="#how-it-works" className="quiet-link min-h-12 px-6">
                 See how it works
               </a>
             </div>
           </Reveal>
 
           <Reveal step={4}>
-            <p className="mt-7 flex items-start gap-2.5 text-[13px] leading-relaxed text-depth-muted">
-              <ShieldCheck
-                className="mt-px h-4 w-4 shrink-0 text-depth-glow"
-                strokeWidth={1.75}
-                aria-hidden="true"
+            <p className="mt-7 flex items-start gap-2.5 text-small-body text-depth-muted">
+              <CoursenIcon
+                name="check"
+                className="mt-0.5 h-4 w-4 shrink-0 text-depth-accent"
               />
               Reads Google Classroom from the session you are already signed
               into. Your school password is never shared with {brand.shortName}.

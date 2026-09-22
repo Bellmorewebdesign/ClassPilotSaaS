@@ -1,132 +1,224 @@
 /**
- * Public identity only. Do not use these names as storage keys, package names,
- * API routes, or hosts. domainStyleName is display text, never a destination.
+ * Coursen public identity - Brand Kit v2.
+ *
+ * Every value here comes from the supplied kit (color/Coursen-Color-Palette.csv,
+ * typography/Coursen-Type-Hierarchy.csv, reference/logo-construction.svg and
+ * motion/Motion-Notes.md). Nothing in this file is invented.
+ *
+ * Public identity ONLY. These names are never storage keys, package names,
+ * API routes or hosts - those stay internal and unchanged. domainStyleName is
+ * display text, never a destination.
  */
 export const brand = {
   name: 'Coursen AI',
   shortName: 'Coursen',
   domainStyleName: 'Coursen.ai',
   extensionName: 'Coursen Sync',
-  tagline: 'Your classes. One intelligent workspace.',
+  /** The memorable brand line. Kit guide page 07. */
+  tagline: 'Know what\u2019s next.',
+  /** Supporting positioning, used beneath the tagline. */
+  positioning: 'One intelligent workspace for school.',
   description:
-    'Your Google Classroom classes and assignments, organized in one clear workspace.',
+    'Coursen brings your classes, assignments, deadlines, announcements, documents and schedule into one workspace.',
   extensionDescription:
-    'Bring your Google Classroom classes and assignments into Coursen AI from your own signed-in browser session.',
+    'Bring your Google Classroom classes and assignments into Coursen from your own signed-in browser session.',
   assistantTitle: 'Ask Coursen',
-  assistantPlaceholder: 'Ask about your classes, assignments, or schedule…',
+  assistantPlaceholder: 'Ask about your classes, assignments, or schedule\u2026',
+
+  /**
+   * Color roles, verbatim from the kit palette.
+   *
+   * "Color roles are more important than more colors" (guide page 17). Each
+   * key is a ROLE, not a hue - so a future palette revision changes values
+   * here and nothing downstream needs to move.
+   */
   colors: {
-    sky: '#9FC7F3',
-    pale: '#EAF3FE',
-    action: '#32659C',
-    ink: '#31445A',
-    background: '#F7F9FC',
-    surface: '#FFFFFF',
-    muted: '#5D6D80',
-    border: '#DCE4ED',
+    /** Buttons, selected items, the mark. */
+    action: '#3F6FA8',
+    /** Pointer hover on primary controls. */
+    actionHover: '#335D8D',
+    /** Large accents only. NEVER behind small white text - see contrast audit. */
+    sky: '#A7C9EE',
+    /** Selection and quiet feature panels. */
+    pale: '#EDF5FD',
+    /** Headings and body text. */
+    ink: '#243448',
+    /** Supporting copy and metadata. */
+    muted: '#657486',
+    /** Nonessential separators. */
+    border: '#D8E1EB',
+    /** Inputs and essential outlines. */
     input: '#7A8A9C',
-    success: '#287354',
+    /** Cards, sheets, navigation. */
+    surface: '#FFFFFF',
+    /** Workspace canvas. */
+    background: '#F7F9FC',
+    /** Quiet, non-status containers. */
+    neutral: '#EEF2F6',
+
+    success: '#2C7057',
     successSurface: '#E8F5ED',
-    warning: '#94601B',
+    warning: '#865B20',
     warningSurface: '#FFF3D9',
-    error: '#AD444E',
+    error: '#A54444',
     errorSurface: '#FCECEF',
+    info: '#3F6FA8',
+    infoSurface: '#EDF5FD',
+
+    /** Unavailable controls. Exempt from the 4.5:1 target - inactive only. */
+    disabled: '#697787',
+    disabledFill: '#EEF2F6',
   },
-  mark: { path: 'M45 17 A21 21 0 1 0 45 47', dotX: 48, dotY: 32 },
+
+  /**
+   * The Waypoint C.
+   *
+   * Geometry transcribed from reference/logo-construction.svg:
+   *   artboard   64 x 64 units
+   *   curve      centre (32, 32), radius 18
+   *   stroke     8 units, rounded terminals
+   *   waypoint   centre (49.5, 32), diameter 8
+   *   opening    90 degrees, on the right
+   *
+   * Expressed as an SVG arc rather than the master's cubic Beziers: it is the
+   * same curve, and it is the form the kit itself uses in
+   * motion/coursen-workspace-loading.svg, where `pathLength` makes the dash
+   * animation exact. Do not alter these numbers - the supplied SVG masters in
+   * public/brand are the authority and these must agree with them.
+   */
+  mark: {
+    path: 'M44.73 44.73 A18 18 0 1 1 44.73 19.27',
+    strokeWidth: 8,
+    dotX: 49.5,
+    dotY: 32,
+    dotRadius: 4,
+    /**
+     * Small-size optical master (16-32px): 9-unit stroke and 9-unit dot, per
+     * the construction sheet. Thickening the stroke keeps the C readable when
+     * the aperture would otherwise close up.
+     */
+    small: { strokeWidth: 9, dotRadius: 4.5 },
+    /** Clear space, in waypoint diameters. Lockup 2x, standalone mark 1x. */
+    clearSpaceLockup: 2,
+    clearSpaceMark: 1,
+    /** Minimum rendered width of the primary lockup, in px. */
+    minLockupWidth: 120,
+  },
 } as const;
 
 /**
- * Depth palette.
+ * Type scale, verbatim from typography/Coursen-Type-Hierarchy.csv.
  *
- * The marketing surface is darker than the workspace on purpose: it lets the
- * product preview glow against it the way a device screen does in a photo,
- * and it draws a clear line between "this is the pitch" and "this is your
- * data". These are separate from `brand.colors` because the workspace must
- * stay light, calm and high-contrast for long reading sessions.
+ * "A clear rhythm from display to metadata" (guide page 21). Components pick a
+ * ROLE; they do not choose sizes. Sizes are px so they match the kit exactly,
+ * and mobile values are the kit's own responsive step.
+ */
+export const type = {
+  display: { desktop: 64, mobile: 40, weight: 600, leading: 1.08, tracking: '-0.035em' },
+  h1: { desktop: 40, mobile: 32, weight: 600, leading: 1.15, tracking: '-0.025em' },
+  h2: { desktop: 28, mobile: 24, weight: 600, leading: 1.25, tracking: '-0.015em' },
+  h3: { desktop: 20, mobile: 20, weight: 600, leading: 1.3, tracking: '-0.01em' },
+  body: { desktop: 16, mobile: 16, weight: 400, leading: 1.55, tracking: '0' },
+  smallBody: { desktop: 14, mobile: 14, weight: 400, leading: 1.5, tracking: '0' },
+  label: { desktop: 13, mobile: 13, weight: 600, leading: 1.4, tracking: '0' },
+  button: { desktop: 14, mobile: 14, weight: 600, leading: 1.3, tracking: '0' },
+  metadata: { desktop: 12, mobile: 12, weight: 500, leading: 1.45, tracking: '0.01em' },
+} as const;
+
+/**
+ * The dark brand surface.
+ *
+ * Not an invention: the kit ships motion/coursen-logo-reveal-dark on exactly
+ * this ground, with the mark in Signature sky and the wordmark in white. So
+ * dark is a sanctioned expression of V2 - it is simply Main ink used as a
+ * field, which is why every value below is drawn from `brand.colors` rather
+ * than being a second palette.
+ *
+ * The workspace stays light regardless. This is for the marketing and auth
+ * surfaces only.
  */
 export const depth = {
-  /** Base canvas for marketing and auth surfaces. */
-  base: '#0B1220',
-  /** One step up - section bands. */
-  raised: '#111B2D',
-  /** Panel fill behind glass layers. */
-  panel: '#16233A',
-  /** Text on dark surfaces. */
-  ink: '#EAF1FA',
-  /** Secondary text on dark surfaces. Contrast ratio 7.0:1 on `base`. */
-  mutedInk: '#9FB2C9',
-  /** Hairline borders on dark surfaces. */
-  line: 'rgba(159, 199, 243, 0.14)',
-  /** Brighter hairline for hovered/active glass. */
-  lineStrong: 'rgba(159, 199, 243, 0.28)',
-  /** The accent that reads as "Coursen" on dark. */
-  glow: '#7FB2F0',
+  /** Main ink as a field. Sampled from the kit's dark reveal: #243448. */
+  base: brand.colors.ink,
+  /** One step down for section bands, so the ground is not flat. */
+  sunken: '#1C2938',
+  /** One step up for raised panels. */
+  raised: '#2C3E54',
+  /** Wordmark and headings on dark. */
+  ink: brand.colors.surface,
+  /** Supporting copy on dark. 8.2:1 on base - see brand.test.ts. */
+  mutedInk: '#B9C7D6',
+  /** The accent on dark IS Signature sky - the kit's dark reveal uses it. */
+  accent: brand.colors.sky,
+  line: 'rgba(167, 201, 238, 0.16)',
+  lineStrong: 'rgba(167, 201, 238, 0.30)',
 } as const;
 
 /**
- * Motion tokens.
+ * Motion, transcribed from motion/Motion-Notes.md and the animated SVG studies.
  *
- * One vocabulary for every transition in the product, so a hover in the
- * marketing nav and a card entering the dashboard feel like the same hand
- * made them. Durations are deliberately short - premium motion is quick and
- * confident, not slow and showy.
+ * The governing idea is "Keep the C still. Let the work move." (guide page 32)
+ * and "Smooth, brief, and easy to ignore." (page 33).
  */
 export const motion = {
   duration: {
-    /** Hover, focus, colour changes. */
     instant: '120ms',
-    /** Buttons, small state changes. */
     fast: '200ms',
-    /** Cards entering, panels opening. */
     base: '320ms',
-    /** Large surfaces, page entrances. */
     slow: '520ms',
-    /** Hero choreography beats. */
-    deliberate: '800ms',
+    /** Logo reveal: curve draw. From the reveal SVG - 0.7s. */
+    curve: '700ms',
+    /** Looping activity studies run at 2.4s. */
+    loop: '2400ms',
+  },
+  /**
+   * Reveal choreography, in milliseconds, exactly as the kit's animated SVG
+   * schedules it. Total active motion 1350ms, matching Motion-Notes.md.
+   */
+  reveal: {
+    curveBegin: 80,
+    curveDuration: 700,
+    waypointBegin: 640,
+    waypointDuration: 300,
+    wordmarkBegin: 830,
+    wordmarkDuration: 520,
+    total: 1350,
   },
   easing: {
-    /** Default. Decelerating - things arrive and settle. */
+    /** The kit's reveal keySplines, verbatim: "0.22 1 0.36 1". */
     out: 'cubic-bezier(0.22, 1, 0.36, 1)',
-    /** Symmetric, for things that move between two states. */
     inOut: 'cubic-bezier(0.65, 0, 0.35, 1)',
-    /** A restrained overshoot. Used sparingly, never on text. */
-    spring: 'cubic-bezier(0.34, 1.28, 0.64, 1)',
   },
 } as const;
 
 /**
- * Surface tokens - the "liquid glass" layer, kept deliberately restrained.
+ * Surfaces.
  *
- * The rule this encodes: glass is a LAYER, never a background for body text.
- * Blur stays low enough that text over it remains legible, and every glass
- * surface carries its own opaque-enough fill rather than relying on whatever
- * happens to be behind it.
+ * Radii follow the kit's component sheet, which is markedly tighter than the
+ * previous 16-24px: cards read at ~12px and controls at ~10px. Translucency
+ * is retained from the earlier work but demoted - the brand is calm and clear
+ * first, and glass is only ever a layer over a real fill.
  */
 export const surface = {
-  /** Frosted panel on a dark backdrop. */
-  glassDark: 'rgba(22, 35, 58, 0.72)',
-  /** Frosted panel on a light backdrop. */
-  glassLight: 'rgba(255, 255, 255, 0.72)',
-  /** Backdrop blur radius. Low on purpose - heavy blur is expensive and muddy. */
-  blur: '18px',
-  /** The top highlight that suggests a refractive edge. */
-  sheen: 'rgba(255, 255, 255, 0.10)',
   radius: {
-    sm: '0.625rem',
-    md: '0.875rem',
-    lg: '1.125rem',
-    xl: '1.5rem',
-    '2xl': '1.875rem',
+    sm: '6px',
+    md: '10px',
+    lg: '12px',
+    xl: '16px',
+    '2xl': '20px',
+    /** The app-icon rounding: 20% of the tile, per the favicon masters. */
+    tile: '20%',
   },
   shadow: {
-    /** Resting card. Barely there. */
-    low: '0 1px 2px rgba(15, 28, 48, 0.06), 0 1px 3px rgba(15, 28, 48, 0.04)',
-    /** Hovered card / raised panel. */
-    mid: '0 4px 12px rgba(15, 28, 48, 0.08), 0 12px 32px rgba(15, 28, 48, 0.06)',
-    /** Floating product preview. */
-    high: '0 24px 64px rgba(6, 16, 34, 0.22), 0 2px 8px rgba(6, 16, 34, 0.12)',
-    /** Accent glow behind the mark. Never on text. */
-    glow: '0 0 48px rgba(127, 178, 240, 0.28)',
+    /** Resting card. The kit's cards are defined by their border, not a shadow. */
+    low: '0 1px 2px rgba(36, 52, 72, 0.04)',
+    mid: '0 2px 8px rgba(36, 52, 72, 0.06), 0 8px 24px rgba(36, 52, 72, 0.05)',
+    high: '0 18px 48px rgba(28, 41, 56, 0.20), 0 2px 6px rgba(28, 41, 56, 0.10)',
   },
+  glassDark: 'rgba(44, 62, 84, 0.72)',
+  glassLight: 'rgba(255, 255, 255, 0.78)',
+  blur: '16px',
+  sheen: 'rgba(255, 255, 255, 0.08)',
 } as const;
 
 function hsl(hex: string): string {
@@ -150,9 +242,19 @@ function hsl(hex: string): string {
   return `${((hue * 60 + 360) % 360).toFixed(2)} ${(s * 100).toFixed(2)}% ${(l * 100).toFixed(2)}%`;
 }
 
-/** Shared by Tailwind's existing semantic tokens and the extension CSS. */
+/**
+ * Emits every token as a CSS custom property.
+ *
+ * Shared by the web app's Tailwind theme and the extension's stylesheet, so
+ * both inherit the kit automatically. The existing semantic names
+ * (--background, --primary, ...) are deliberately preserved: the workspace UI
+ * and the extension already depend on them, and a brand revision should not
+ * require a find-and-replace across components.
+ */
 export function brandCssVariables(): Record<string, string> {
   const c = brand.colors;
+
+  // Tailwind's semantic layer, mapped onto V2 roles.
   const semantic = {
     background: c.background,
     foreground: c.ink,
@@ -162,7 +264,7 @@ export function brandCssVariables(): Record<string, string> {
     'primary-foreground': c.surface,
     secondary: c.pale,
     'secondary-foreground': c.action,
-    muted: c.background,
+    muted: c.neutral,
     'muted-foreground': c.muted,
     accent: c.action,
     'accent-foreground': c.surface,
@@ -172,10 +274,22 @@ export function brandCssVariables(): Record<string, string> {
     input: c.input,
     ring: c.action,
   };
+
   const flatten = (prefix: string, group: Record<string, string>) =>
     Object.fromEntries(
       Object.entries(group).map(([key, value]) => [`--${prefix}-${key}`, value]),
     );
+
+  // Type roles become three variables each: size, line height, tracking. The
+  // mobile step is emitted separately and swapped by one media query.
+  const typeVars: Record<string, string> = {};
+  for (const [role, spec] of Object.entries(type)) {
+    typeVars[`--text-${role}`] = `${spec.desktop}px`;
+    typeVars[`--text-${role}-mobile`] = `${spec.mobile}px`;
+    typeVars[`--leading-${role}`] = String(spec.leading);
+    typeVars[`--tracking-${role}`] = spec.tracking;
+    typeVars[`--weight-${role}`] = String(spec.weight);
+  }
 
   return {
     ...Object.fromEntries(
@@ -189,12 +303,33 @@ export function brandCssVariables(): Record<string, string> {
     ...flatten('ease', motion.easing),
     ...flatten('radius', surface.radius),
     ...flatten('shadow', surface.shadow),
+    ...typeVars,
     '--glass-dark': surface.glassDark,
     '--glass-light': surface.glassLight,
     '--glass-blur': surface.blur,
     '--glass-sheen': surface.sheen,
-    '--radius': '1rem',
+    // Kept for any consumer still reading the generic radius.
+    '--radius': surface.radius.lg,
   };
+}
+
+/**
+ * The mark as a standalone SVG string, for the extension and for generated
+ * icons. `size` selects the optical master: 16-32px uses the thicker small
+ * stroke per the construction sheet.
+ */
+export function brandMarkSvg(size = 64, color: string = brand.colors.action): string {
+  const optical = size <= 32 ? brand.mark.small : brand.mark;
+  const scale = size / 64;
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img">`,
+    `<path d="${brand.mark.path}" fill="none" stroke="${color}" stroke-width="${optical.strokeWidth}" stroke-linecap="round"/>`,
+    `<circle cx="${brand.mark.dotX}" cy="${brand.mark.dotY}" r="${optical.dotRadius}" fill="${color}"/>`,
+    `</svg>`,
+  ].join('');
+  // `scale` is intentionally unused: the viewBox does the scaling, which keeps
+  // the geometry identical to the supplied masters at every size.
+  void scale;
 }
 
 /** Build-time markup; escapes future names instead of injecting raw HTML. */
@@ -217,8 +352,4 @@ export function brandMarkup(template: string): string {
       throw new Error(`Unknown brand template field: ${key}`);
     return escape(value);
   });
-}
-
-export function brandMarkSvg(): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="${brand.mark.path}" fill="none" stroke="${brand.colors.action}" stroke-width="8" stroke-linecap="round"/><circle cx="${brand.mark.dotX}" cy="${brand.mark.dotY}" r="4" fill="${brand.colors.action}"/></svg>`;
 }
