@@ -178,6 +178,32 @@ export function assignmentDetailUrl(
   return `${CLASSROOM_ORIGIN}/c/${courseId}/a/${courseWorkId}/details`;
 }
 
+/** Canonical material detail URL. Materials live under /m/, not /a/. */
+export function materialDetailUrl(
+  courseId: string,
+  courseWorkId: string,
+): string {
+  return `${CLASSROOM_ORIGIN}/c/${courseId}/m/${courseWorkId}/details`;
+}
+
+/**
+ * Canonical detail URL for a coursework item, preserving its kind.
+ *
+ * Classroom routes assignments and quizzes to `/a/` and materials to `/m/`.
+ * They are different pages with different content, so building one from the
+ * other produces a URL that either 404s or silently shows the wrong thing.
+ * Discovery reads the kind off the link it found; this keeps it.
+ */
+export function courseWorkDetailUrl(
+  courseId: string,
+  courseWorkId: string,
+  kind: 'assignment' | 'material',
+): string {
+  return kind === 'material'
+    ? materialDetailUrl(courseId, courseWorkId)
+    : assignmentDetailUrl(courseId, courseWorkId);
+}
+
 /** True when the URL points anywhere on Google Classroom. */
 export function isClassroomUrl(rawUrl: string | null | undefined): boolean {
   return parseClassroomUrl(rawUrl).isClassroom;

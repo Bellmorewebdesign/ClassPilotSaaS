@@ -66,15 +66,28 @@ export function CoursenIcon({
   name,
   className,
   title,
+  size = 24,
 }: {
   name: CoursenIconName;
   className?: string;
   /** Supply only when the icon is the sole label for a control. */
   title?: string;
+  /**
+   * Intrinsic size in px. Almost never worth setting - the default matches
+   * the 24x24 frame and CSS sizes the icon in practice. It exists so the
+   * icon has a bounded size before CSS applies: an <svg> with a viewBox and
+   * no width/height falls back to `width:100%` of its container, which
+   * during a client-side route change (new DOM, stylesheet chunk not yet
+   * loaded) renders a viewport-filling glyph. See BrandMark for the full
+   * account.
+   */
+  size?: number;
 }) {
   return (
     <svg
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       className={className}
       role={title ? 'img' : undefined}
       aria-hidden={title ? undefined : true}

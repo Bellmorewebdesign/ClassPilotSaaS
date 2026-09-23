@@ -7,9 +7,11 @@ import type {
   PopupRequest,
   PopupResponse,
   ProgressBroadcast,
+  SyncMode,
   SyncProgress,
   SyncSummary,
 } from '../lib/messages.js';
+import { defaultModeFor, loadSyncState } from './syncState.js';
 import { loadSettings, saveSettings, normalizeApiUrl } from '../lib/settings.js';
 import { sendToTab } from './helperTab.js';
 import { SyncAbortedError, runSync } from './syncEngine.js';
@@ -43,14 +45,17 @@ const runtime: RuntimeState = {
   lastError: null,
 };
 
-function idleProgress(): SyncProgress {
+function idleProgress(mode: SyncMode = 'incremental'): SyncProgress {
   return {
     phase: 'idle',
+    mode,
     classesDone: 0,
     classesTotal: 0,
     assignmentsDone: 0,
     assignmentsTotal: 0,
+    announcementsFound: 0,
     currentLabel: null,
+    waitingForClassroom: false,
   };
 }
 
@@ -98,6 +103,7 @@ async function checkConnection(): Promise<ConnectionStatus> {
 
 async function buildState(connection?: ConnectionStatus): Promise<ExtensionState> {
   const settings = await loadSettings();
+  const syncState = await loadSyncState();
   return {
     settings: { apiUrl: settings.apiUrl, hasToken: settings.apiToken !== '' },
     connection: connection ?? (await checkConnection()),
@@ -106,6 +112,12 @@ async function buildState(connection?: ConnectionStatus): Promise<ExtensionState
     progress: runtime.progress,
     lastSummary: await getLastSummary(),
     lastError: runtime.lastError,
+    sync: {
+      lastSuccessfulSyncAt: syncState.lastSuccessfulSyncAt,
+      lastDeepScanAt: syncState.lastDeepScanAt,
+      nextMode: defaultModeFor(syncState),
+      interrupted: syncState.interrupted,
+    },
   };
 }
 
@@ -128,7 +140,7 @@ async function broadcast(): Promise<void> {
 // Sync lifecycle
 // ---------------------------------------------------------------------------
 
-async function startSync(): Promise<void> {
+async function startSync(options: { mode?: SyncMode; classId?: string } = {}): Promise<void> {
   if (runtime.syncing) return;
 
   const settings = await loadSettings();
@@ -141,16 +153,21 @@ async function startSync(): Promise<void> {
     return;
   }
 
+  const syncState = await loadSyncState();
+  const mode = options.mode ?? defaultModeFor(syncState);
+
   runtime.syncing = true;
   runtime.cancelRequested = false;
   runtime.lastError = null;
-  runtime.progress = idleProgress();
+  runtime.progress = idleProgress(mode);
   await broadcast();
 
   try {
     const summary = await runSync({
       client: new ApiClient(settings),
       clientVersion: CLIENT_VERSION,
+      mode,
+      ...(options.classId === undefined ? {} : { onlyClassId: options.classId }),
       onProgress: (progress) => {
         runtime.progress = progress;
         void broadcast();
@@ -192,7 +209,10 @@ async function handlePopupRequest(request: PopupRequest): Promise<PopupResponse>
       // Deliberately not awaited: the popup gets an immediate acknowledgement
       // and follows along via SYNC_PROGRESS broadcasts, so it can be closed
       // and reopened mid-sync.
-      void startSync();
+      void startSync({
+        ...(request.mode === undefined ? {} : { mode: request.mode }),
+        ...(request.classId === undefined ? {} : { classId: request.classId }),
+      });
       return { ok: true, type: 'ACK' };
 
     case 'CANCEL_SYNC':

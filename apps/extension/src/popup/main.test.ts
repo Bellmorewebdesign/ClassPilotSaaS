@@ -18,14 +18,23 @@ const state: ExtensionState = {
   syncing: false,
   progress: {
     phase: 'idle',
+    mode: 'incremental',
     classesDone: 0,
     classesTotal: 0,
     assignmentsDone: 0,
     assignmentsTotal: 0,
+    announcementsFound: 0,
     currentLabel: null,
+    waitingForClassroom: false,
   },
   lastSummary: null,
   lastError: null,
+  sync: {
+    lastSuccessfulSyncAt: null,
+    lastDeepScanAt: null,
+    nextMode: 'incremental',
+    interrupted: null,
+  },
 };
 
 const sendMessage = vi.fn(async (request: PopupRequest) => {

@@ -33,7 +33,9 @@ export default function AuthLayout({
           </p>
           {/* The mark as brand presence, at a size where the aperture reads. */}
           <BrandMark
-            size={200}
+            // 160 matches h-40, the base CSS size; xl scales it up from there.
+            // Keeping the two in step is what bounds the pre-CSS paint.
+            size={160}
             className="mt-12 h-40 w-40 text-primary xl:h-52 xl:w-52"
           />
         </div>

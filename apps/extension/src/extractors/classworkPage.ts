@@ -1,4 +1,5 @@
 import {
+  courseWorkDetailUrl,
   parseClassroomUrl,
   toAbsoluteClassroomUrl,
   type AssignmentType,
@@ -27,15 +28,34 @@ import { ExtractionRecorder, type ExtractionContext } from './framework.js';
  * Discovery again rests on the URL grammar: coursework items link to
  * `/c/<courseId>/a/<workId>/details` (assignments and quizzes) or
  * `/c/<courseId>/m/<workId>/details` (materials).
+ *
+ * That distinction is load-bearing. This extractor used to canonicalise
+ * every discovered item into an `/a/` URL regardless of the link it came
+ * from, which turned every material into a non-existent assignment page. The
+ * kind is now carried through on the item.
  */
 
-export const CLASSWORK_EXTRACTOR_VERSION = '1.0.0';
+export const CLASSWORK_EXTRACTOR_VERSION = '1.1.0';
+
+/**
+ * Which Classroom route an item lives on.
+ *
+ * Not the same question as `assignmentType`. A quiz is an assignment as far
+ * as routing is concerned (`/a/`), while a material is its own page
+ * (`/m/`). Conflating the two produced URLs that pointed at the wrong page.
+ */
+export type CourseWorkKind = 'assignment' | 'material';
 
 export interface ClassworkItemCandidate {
   /** Opaque coursework id from the URL. */
   sourceId: string;
   /** Canonical detail-page URL for the sync engine to visit. */
   canonicalUrl: string;
+  /**
+   * The route this item lives on, taken from the link Classroom rendered.
+   * Preserved so the detail URL is never rebuilt as the wrong kind.
+   */
+  kind: CourseWorkKind;
   courseId: string;
   /** Title as rendered in the list; refined later from the detail page. */
   title: string | null;
@@ -92,9 +112,18 @@ export function extractClassworkPage(context: ExtractionContext): {
     const row = findItemRow(anchor);
     const rowText = visibleText(row) ?? '';
 
+    /*
+     * Read the kind off the URL Classroom gave us. Materials are /m/ pages
+     * and assignments are /a/ pages; they render differently and canonicalising
+     * one into the other sends the helper tab somewhere that does not exist.
+     */
+    const kind: CourseWorkKind =
+      parsed.kind === 'material_detail' ? 'material' : 'assignment';
+
     items.push({
       sourceId: workId,
-      canonicalUrl: `https://classroom.google.com/c/${itemCourseId}/a/${workId}/details`,
+      canonicalUrl: courseWorkDetailUrl(itemCourseId, workId, kind),
+      kind,
       courseId: itemCourseId,
       title: extractItemTitle(anchor, row),
       assignmentType: inferAssignmentType(parsed.kind, anchor, row),

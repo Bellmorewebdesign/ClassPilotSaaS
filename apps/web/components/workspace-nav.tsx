@@ -14,6 +14,7 @@ const LINKS: Array<{ href: string; label: string; icon: CoursenIconName }> = [
   { href: '/dashboard', label: 'Overview', icon: 'overview' },
   { href: '/assignments', label: 'Assignments', icon: 'assignment' },
   { href: '/classes', label: 'Classes', icon: 'classes' },
+  { href: '/calendar', label: 'Calendar', icon: 'calendar' },
   { href: '/integrations', label: 'Integrations', icon: 'source' },
 ];
 
@@ -30,7 +31,7 @@ export function WorkspaceNav({ mobile = false }: { mobile?: boolean }) {
   return (
     <nav
       aria-label={mobile ? 'Workspace sections' : 'Workspace'}
-      className={cn(mobile ? 'grid grid-cols-4 gap-1' : 'space-y-1')}
+      className={cn(mobile ? 'grid grid-cols-5 gap-0.5' : 'space-y-1')}
     >
       {LINKS.map(({ href, label, icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);

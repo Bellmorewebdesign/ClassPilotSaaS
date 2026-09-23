@@ -296,6 +296,33 @@ main,
   transition: width var(--duration-base) var(--ease-out);
 }
 
+.progress-mode {
+  margin: 2px 0 0;
+  font-size: var(--text-metadata);
+  font-weight: var(--weight-metadata);
+  letter-spacing: var(--tracking-metadata);
+  color: var(--accent);
+}
+
+/* --- interrupted run ----------------------------------------------------- */
+
+/*
+ * Shown when a previous sync stopped before it finished. Resume repeats the
+ * same policy - the stored per-item freshness is what stops it redoing work
+ * it already completed.
+ */
+.resume {
+  background: var(--brand-warningSurface);
+  border-radius: var(--radius-xl);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.resume-note {
+  margin: 0 0 12px;
+  font-size: var(--text-smallBody);
+  color: var(--fg);
+}
+
 /* --- result ------------------------------------------------------------- */
 
 .result {
@@ -382,6 +409,13 @@ main,
   margin: 0;
   color: var(--fg);
   overflow-wrap: anywhere;
+}
+.error-title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: var(--tracking-h3);
+  margin-bottom: 2px !important;
 }
 
 /* --- controls ----------------------------------------------------------- */
