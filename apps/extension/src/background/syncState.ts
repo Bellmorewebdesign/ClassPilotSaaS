@@ -26,6 +26,21 @@ import type { SyncCounts, SyncMode } from '../lib/messages.js';
 const STATE_KEY = 'classpilot.syncState';
 
 /**
+ * Freshness-record schema version.
+ *
+ * Bumped when a bug made the stored records untrustworthy. Version 1 stamped
+ * lastFetchedAt before the detail page was read, so an item whose read failed
+ * was recorded as fetched and skipped by every incremental sync for the next
+ * 24 hours. Those records cannot be repaired - there is no way to tell a
+ * genuine read from a poisoned one - so loading an older version drops the
+ * per-item table and lets the next sync rebuild it.
+ *
+ * Only the freshness table is dropped. Nothing about the user's synced
+ * coursework lives here, so this costs one thorough sync and nothing else.
+ */
+const STATE_VERSION = 2;
+
+/**
  * How long a stored detail page is trusted before an incremental run reads
  * it again.
  *
@@ -60,6 +75,8 @@ export interface InterruptedSync {
 }
 
 export interface SyncState {
+  /** Schema version of the freshness table. See STATE_VERSION. */
+  version: number;
   /** Null until the first sync completes. Drives initial_backfill vs incremental. */
   lastSuccessfulSyncAt: string | null;
   lastSuccessfulMode: SyncMode | null;
@@ -87,6 +104,7 @@ const MAX_TRACKED_ITEMS = 5000;
 
 function emptyState(): SyncState {
   return {
+    version: STATE_VERSION,
     lastSuccessfulSyncAt: null,
     lastSuccessfulMode: null,
     lastDeepScanAt: null,
@@ -104,10 +122,21 @@ export async function loadSyncState(): Promise<SyncState> {
     if (!state) return emptyState();
     // Merge over a fresh object so a state written by an older version, or a
     // partially-written one, can never produce undefined fields.
-    return { ...emptyState(), ...state, items: state.items ?? {} };
+    return migrate({ ...emptyState(), ...state, items: state.items ?? {} });
   } catch {
     return emptyState();
   }
+}
+
+/**
+ * Bring a stored state up to the current schema.
+ *
+ * Exported so the migration is testable without chrome.storage. It keeps the
+ * sync history and drops only what it cannot trust.
+ */
+export function migrate(state: SyncState): SyncState {
+  if (state.version === STATE_VERSION) return state;
+  return { ...state, version: STATE_VERSION, items: {} };
 }
 
 async function writeSyncState(state: SyncState): Promise<void> {
@@ -203,10 +232,36 @@ export function shouldReadDetailFor(
 export async function shouldReadDetail(mode: SyncMode, sourceId: string): Promise<boolean> {
   const state = await loadSyncState();
   const read = shouldReadDetailFor(mode, state.items[sourceId], Date.now());
-  // Record the sighting either way: an item we skipped is still an item we saw.
-  applyItemSeen(state, sourceId, read, new Date().toISOString());
+
+  /*
+   * Records the SIGHTING only - never the fetch.
+   *
+   * This used to stamp lastFetchedAt here, before the detail page had been
+   * opened. An item whose read then failed was recorded as successfully
+   * fetched, so every incremental sync for the next 24 hours skipped it. One
+   * bad first sync could therefore poison the record and leave later syncs
+   * reading nothing at all, which is indistinguishable from the extension
+   * being broken.
+   *
+   * Only recordDetailRead, called after a successful extraction, may move
+   * lastFetchedAt.
+   */
+  applyItemSeen(state, sourceId, false, new Date().toISOString());
   await writeSyncState(state);
   return read;
+}
+
+/**
+ * Mark a detail page as successfully read.
+ *
+ * Called only after the extractor returned a candidate. A failed read leaves
+ * lastFetchedAt alone, so the next sync tries again rather than trusting a
+ * page it never managed to read.
+ */
+export async function recordDetailRead(sourceId: string): Promise<void> {
+  const state = await loadSyncState();
+  applyItemSeen(state, sourceId, true, new Date().toISOString());
+  await writeSyncState(state);
 }
 
 export async function recordSyncSuccess(run: {

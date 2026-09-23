@@ -15,6 +15,7 @@ import type { ReadinessResult } from '../extractors/readiness.js';
 import {
   loadSyncState,
   recordClassSynced,
+  recordDetailRead,
   recordSyncFailure,
   recordSyncSuccess,
   shouldReadDetail,
@@ -439,6 +440,9 @@ export async function runSync(deps: SyncEngineDeps): Promise<SyncSummary> {
 
             if (detail.ok && detail.type === 'ASSIGNMENT') {
               pendingAssignments.push(detail.assignment);
+              // Freshness is stamped HERE, on success only. A failed read
+              // must leave the item stale so the next sync retries it.
+              await recordDetailRead(item.sourceId);
               if (item.kind === 'material') counts.materialsRead += 1;
               else counts.assignmentsRead += 1;
             } else {

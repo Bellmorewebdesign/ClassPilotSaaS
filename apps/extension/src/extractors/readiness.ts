@@ -328,6 +328,12 @@ const DEFAULTS = {
   settleMs: 400,
 } as const;
 
+/** Never probe more often than this, however hard the page is churning. */
+const COALESCE_MS = 150;
+
+/** Drives the settle clock when the page has gone quiet. */
+const POLL_MS = 250;
+
 /**
  * Wait until `document` reaches the semantic state `target` requires.
  *
@@ -351,14 +357,18 @@ export function awaitReady(
   let stayedHidden = document.hidden === true;
 
   return new Promise<ReadinessResult>((resolve) => {
-    let settleTimer: ReturnType<typeof setTimeout> | undefined;
     let done = false;
+    /** When the current fingerprint was first seen. */
+    let stableSince: number | null = null;
+    let lastFingerprint: string | null = null;
+    let lastRun = 0;
+    let trailing: ReturnType<typeof setTimeout> | undefined;
 
     const finish = (state: ReadinessState, signals: ReadinessSignal[]): void => {
       if (done) return;
       done = true;
       observer.disconnect();
-      if (settleTimer !== undefined) clearTimeout(settleTimer);
+      if (trailing !== undefined) clearTimeout(trailing);
       clearInterval(pollTimer);
       clearTimeout(deadlineTimer);
       resolve({
@@ -373,22 +383,26 @@ export function awaitReady(
     };
 
     /**
-     * Re-check, and if the page looks terminal hold it for `settleMs` of DOM
-     * quiet before accepting. Any mutation inside that window restarts the
-     * hold, which is what stops a half-rendered list being read as complete.
+     * Re-check, and accept once the SIGNALS have held steady for settleMs.
+     *
+     * This used to hold for `settleMs` of DOM SILENCE, which was wrong in a
+     * way that only a real page shows. Google Classroom never goes silent -
+     * focus rings, aria-live regions, lazy images and its own polling all
+     * mutate the tree continuously - so the hold was restarted forever and
+     * every page ran to the deadline. Fifty navigations at twenty seconds
+     * each is a sync that looks hung.
+     *
+     * What actually matters is whether the thing we are measuring has
+     * stopped changing. The fingerprint covers the probe's state and its
+     * signal counts, so a page can churn as much as it likes: the hold only
+     * restarts when the class list, the item list or the shell state
+     * actually moves.
      */
     const evaluate = (): void => {
       if (done) return;
       if (!document.hidden) stayedHidden = false;
 
       const probe = PROBES[target](document, getUrl());
-      if (probe.state === null) {
-        if (settleTimer !== undefined) {
-          clearTimeout(settleTimer);
-          settleTimer = undefined;
-        }
-        return;
-      }
 
       // signed_out and wrong_page are decisions about the URL, not about
       // rendering, so they need no settle.
@@ -397,16 +411,53 @@ export function awaitReady(
         return;
       }
 
-      if (settleTimer !== undefined) clearTimeout(settleTimer);
-      settleTimer = setTimeout(() => {
-        const confirmed = PROBES[target](document, getUrl());
-        finish(confirmed.state ?? probe.state ?? 'timeout', confirmed.signals);
-      }, settleMs);
+      if (probe.state === null) {
+        stableSince = null;
+        lastFingerprint = null;
+        return;
+      }
+
+      const fingerprint = fingerprintOf(probe);
+      if (fingerprint !== lastFingerprint) {
+        // Real content changed. Start the hold again - this is what stops a
+        // half-rendered list being read as complete.
+        lastFingerprint = fingerprint;
+        stableSince = now();
+        return;
+      }
+      if (stableSince !== null && now() - stableSince >= settleMs) {
+        finish(probe.state, probe.signals);
+      }
+    };
+
+    /**
+     * Throttle, leading edge.
+     *
+     * A probe walks every anchor on the page. Running one per mutation batch
+     * on a live Classroom page pegged the CPU and competed with Classroom's
+     * own rendering in the same tab. Leading edge matters because a hidden
+     * tab's timers are clamped: the first evaluation after a burst still
+     * happens immediately.
+     */
+    const schedule = (): void => {
+      if (done) return;
+      const since = now() - lastRun;
+      if (since >= COALESCE_MS) {
+        lastRun = now();
+        evaluate();
+        return;
+      }
+      if (trailing !== undefined) return;
+      trailing = setTimeout(() => {
+        trailing = undefined;
+        lastRun = now();
+        evaluate();
+      }, COALESCE_MS - since);
     };
 
     const observer = new MutationObserver((records) => {
       mutations += records.length;
-      evaluate();
+      schedule();
     });
     observer.observe(document.documentElement, {
       childList: true,
@@ -416,12 +467,11 @@ export function awaitReady(
     });
 
     /*
-     * A backstop, not the mechanism. Some renders finish before the observer
-     * is installed, and a page can reach its terminal state through something
-     * the observer filter does not see. Chrome throttles this in a hidden
-     * tab - which is exactly why it is not what we depend on.
+     * Drives the settle clock when the page has gone quiet, and catches a
+     * render that finished before the observer was installed. Tighter than
+     * settleMs so the hold cannot overshoot by much.
      */
-    const pollTimer = setInterval(evaluate, 500);
+    const pollTimer = setInterval(evaluate, POLL_MS);
 
     const deadlineTimer = setTimeout(() => {
       const probe = PROBES[target](document, getUrl());
@@ -429,6 +479,22 @@ export function awaitReady(
     }, timeoutMs);
 
     // The page may already be there.
+    lastRun = now();
     evaluate();
   });
+}
+
+/**
+ * A cheap identity for "what the probe can see".
+ *
+ * Covers the state and every signal's presence and count, so it changes when
+ * the class list grows or the shell stops being busy, and does not change
+ * when Classroom merely repaints.
+ */
+function fingerprintOf(probe: Probe): string {
+  let out = probe.state ?? 'null';
+  for (const signal of probe.signals) {
+    out += `|${signal.name}:${signal.found ? 1 : 0}:${signal.count ?? ''}`;
+  }
+  return out;
 }

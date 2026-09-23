@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyItemSeen,
   defaultModeFor,
+  migrate,
   shouldReadDetailFor,
   type SeenItem,
   type SyncState,
@@ -17,6 +18,7 @@ import {
 
 function state(overrides: Partial<SyncState> = {}): SyncState {
   return {
+    version: 2,
     lastSuccessfulSyncAt: null,
     lastSuccessfulMode: null,
     lastDeepScanAt: null,
@@ -135,5 +137,98 @@ describe('tracking what has been seen', () => {
     expect(shouldReadDetailFor('incremental', s.items.abc, now + 5 * 60_000)).toBe(false);
     // ...but a day later it is fair game again.
     expect(shouldReadDetailFor('incremental', s.items.abc, now + 2 * DAY)).toBe(true);
+  });
+});
+
+/**
+ * Freshness is stamped on SUCCESS only.
+ *
+ * `shouldReadDetail` used to stamp lastFetchedAt at the moment it decided to
+ * read, before the detail page had been opened. An item whose read then
+ * failed was recorded as fetched, so every incremental sync for the next 24
+ * hours skipped it. One bad first sync poisoned the record and left later
+ * syncs reading nothing - which looks exactly like a broken extension.
+ */
+describe('a failed read must not be recorded as fetched', () => {
+  const now = Date.now();
+  const iso = new Date(now).toISOString();
+
+  it('a sighting alone does not make an item fresh', () => {
+    // What shouldReadDetail now records: seen, not fetched.
+    const s = applyItemSeen(state(), 'abc', false, iso);
+    expect(s.items.abc?.lastFetchedAt).toBeNull();
+    expect(shouldReadDetailFor('incremental', s.items.abc, now + 60_000)).toBe(true);
+  });
+
+  it('the next sync retries an item whose read failed', () => {
+    let s = state();
+    // Sync one: seen, decided to read, extraction failed - no fetch recorded.
+    s = applyItemSeen(s, 'abc', false, iso);
+    // Sync two, five minutes later.
+    expect(shouldReadDetailFor('incremental', s.items.abc, now + 5 * 60_000)).toBe(true);
+  });
+
+  it('only a successful read makes an item fresh', () => {
+    let s = applyItemSeen(state(), 'abc', false, iso);
+    expect(shouldReadDetailFor('incremental', s.items.abc, now + 60_000)).toBe(true);
+    // recordDetailRead's effect.
+    s = applyItemSeen(s, 'abc', true, iso);
+    expect(shouldReadDetailFor('incremental', s.items.abc, now + 60_000)).toBe(false);
+  });
+
+  it('a whole failed sync leaves every item readable next time', () => {
+    let s = state();
+    for (const id of ['a1', 'a2', 'a3']) s = applyItemSeen(s, id, false, iso);
+    for (const id of ['a1', 'a2', 'a3']) {
+      expect(shouldReadDetailFor('incremental', s.items[id], now + 60_000), id).toBe(true);
+    }
+  });
+});
+
+/**
+ * Recovering from the poisoned freshness table.
+ *
+ * Version 1 stamped lastFetchedAt before the read happened, so a user whose
+ * first sync struggled ended up with items marked fetched that had never been
+ * read - and every incremental sync afterwards skipped them. There is no way
+ * to tell a genuine record from a poisoned one, so the table is dropped and
+ * rebuilt. It heals itself on the next sync with no user action.
+ */
+describe('migrating a stored state', () => {
+  it('drops a version 1 freshness table', () => {
+    const poisoned = state({
+      lastSuccessfulSyncAt: '2026-09-22T10:00:00.000Z',
+      items: {
+        a1: {
+          firstSeenAt: '2026-09-22T10:00:00.000Z',
+          lastSeenAt: '2026-09-22T10:00:00.000Z',
+          // Never actually read, but recorded as fetched.
+          lastFetchedAt: '2026-09-22T10:00:00.000Z',
+        },
+      },
+    });
+    poisoned.version = 1;
+
+    const migrated = migrate(poisoned);
+    expect(migrated.items).toEqual({});
+    // The sync history itself is still trustworthy and is kept.
+    expect(migrated.lastSuccessfulSyncAt).toBe('2026-09-22T10:00:00.000Z');
+  });
+
+  it('makes every previously-skipped item readable again', () => {
+    const poisoned = state({
+      items: {
+        a1: { firstSeenAt: 'x', lastSeenAt: 'x', lastFetchedAt: new Date().toISOString() },
+      },
+    });
+    poisoned.version = 1;
+
+    const migrated = migrate(poisoned);
+    expect(shouldReadDetailFor('incremental', migrated.items.a1, Date.now())).toBe(true);
+  });
+
+  it('leaves a current state alone', () => {
+    const current = applyItemSeen(state(), 'a1', true, new Date().toISOString());
+    expect(migrate(current).items.a1).toBeDefined();
   });
 });

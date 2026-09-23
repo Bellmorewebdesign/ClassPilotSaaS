@@ -167,7 +167,9 @@ describe('awaitReady', () => {
   it('resolves immediately when the page is already ready', async () => {
     const doc = mount(`<main><a href="/c/${COURSE}">Chem</a></main>`);
     const promise = awaitReady(doc, () => HOME, 'home', { settleMs: 100 });
-    await vi.advanceTimersByTimeAsync(150);
+    // Stability is confirmed by the next probe, so this has to cross a poll
+    // tick rather than just the settle window.
+    await vi.advanceTimersByTimeAsync(600);
     const result = await promise;
     expect(result.state).toBe('ready');
   });
@@ -266,7 +268,7 @@ describe('awaitReady', () => {
   it('stops observing once it resolves', async () => {
     const doc = mount(`<main><a href="/c/${COURSE}">Chem</a></main>`);
     const promise = awaitReady(doc, () => HOME, 'home', { settleMs: 50 });
-    await vi.advanceTimersByTimeAsync(100);
+    await vi.advanceTimersByTimeAsync(600);
     const result = await promise;
     const before = result.mutations;
 
@@ -275,4 +277,95 @@ describe('awaitReady', () => {
     await vi.advanceTimersByTimeAsync(500);
     expect(result.mutations).toBe(before);
   });
+});
+
+/**
+ * Live-page behaviour.
+ *
+ * These are the tests the fixture suite above could not have caught, and the
+ * gap cost a real sync. A happy-dom fixture is static; Google Classroom never
+ * stops mutating. The original settle logic held for `settleMs` of DOM
+ * SILENCE, so on a live page the hold restarted forever and every navigation
+ * ran to the 20s deadline - roughly seventeen minutes for one sync, with the
+ * CPU pegged by a full-document probe on every mutation batch.
+ */
+describe('awaitReady on a page that never stops mutating', () => {
+  let window: Window;
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  function mountLive(html: string): { doc: Document; stop: () => void } {
+    vi.useRealTimers();
+    window = new Window();
+    vi.stubGlobal('MutationObserver', window.MutationObserver);
+    const doc = window.document as unknown as Document;
+    doc.body.innerHTML = `${html}<div id="noise"></div>`;
+
+    // Focus rings, aria-live regions, lazy images, Classroom's own polling.
+    const noise = doc.getElementById('noise')!;
+    let n = 0;
+    const churn = setInterval(() => {
+      noise.setAttribute('role', n++ % 2 ? 'presentation' : 'none');
+      noise.append(doc.createElement('span'));
+    }, 20);
+    return { doc, stop: () => clearInterval(churn) };
+  }
+
+  it('settles on content stability, not on DOM silence', async () => {
+    const { doc, stop } = mountLive(`<main><a href="/c/${COURSE}">Chem</a></main>`);
+    const started = Date.now();
+    const result = await awaitReady(doc, () => HOME, 'home', {
+      settleMs: 300,
+      timeoutMs: 6000,
+    });
+    const elapsed = Date.now() - started;
+    stop();
+
+    expect(result.state).toBe('ready');
+    // The content was there from the first millisecond. Anything near the
+    // deadline means page noise is holding the wait open again.
+    expect(elapsed).toBeLessThan(2000);
+  }, 20_000);
+
+  it('throttles probing so a chatty page cannot peg the CPU', async () => {
+    const { doc, stop } = mountLive(`<main><a href="/c/${COURSE}">Chem</a></main>`);
+    const result = await awaitReady(doc, () => HOME, 'home', {
+      settleMs: 300,
+      timeoutMs: 6000,
+    });
+    stop();
+    // Mutation records still counted, but nowhere near one probe each: the
+    // throttle is what keeps a full-document walk off the hot path.
+    expect(result.mutations).toBeGreaterThan(5);
+  }, 20_000);
+
+  it('still waits for a list that is genuinely still growing', async () => {
+    const { doc, stop } = mountLive('<main></main>');
+    const main = doc.querySelector('main')!;
+
+    // Classes arrive in three passes, as a real render does.
+    const ids = [COURSE, COURSE_B, WORK];
+    let added = 0;
+    const adding = setInterval(() => {
+      if (added >= ids.length) return;
+      const a = doc.createElement('a');
+      a.setAttribute('href', `/c/${ids[added++]}`);
+      main.append(a);
+    }, 120);
+
+    const result = await awaitReady(doc, () => HOME, 'home', {
+      settleMs: 300,
+      timeoutMs: 8000,
+    });
+    clearInterval(adding);
+    stop();
+
+    expect(result.state).toBe('ready');
+    const classes = result.signals.find((s) => s.name === 'classLinks');
+    // All three, not the one that existed when the first probe ran.
+    expect(classes?.count).toBe(3);
+  }, 20_000);
 });
