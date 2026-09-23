@@ -3,6 +3,7 @@ import { ValueGrid } from '@/components/marketing/value-grid';
 import { IntegrationShowcase } from '@/components/marketing/integration-showcase';
 import { DashboardPreview } from '@/components/marketing/dashboard-preview';
 import { AskPreview } from '@/components/marketing/ask-preview';
+import { AgentRoadmap } from '@/components/marketing/agent-roadmap';
 import { HowItWorks } from '@/components/marketing/how-it-works';
 import { FinalCta } from '@/components/marketing/final-cta';
 
@@ -16,7 +17,12 @@ import { FinalCta } from '@/components/marketing/final-cta';
  *
  * Section order follows the pitch: what it is (hero), why it is needed
  * (problem), what it connects to (integrations), what it looks like
- * (dashboard), where it is going (assistant), how to start (how it works).
+ * (dashboard), where it is going (assistant, then the agent roadmap), how to
+ * start (how it works).
+ *
+ * The roadmap section is the one place the page describes capabilities that
+ * do not exist yet. It carries its own per-item state labels so the tense is
+ * never ambiguous - see agent-roadmap.tsx.
  */
 export default function HomePage() {
   return (
@@ -26,6 +32,7 @@ export default function HomePage() {
       <IntegrationShowcase />
       <DashboardPreview />
       <AskPreview />
+      <AgentRoadmap />
       <HowItWorks />
       <FinalCta />
     </>

@@ -10,6 +10,7 @@ const SECTIONS = [
   { href: '#product', label: 'Product' },
   { href: '#how-it-works', label: 'How it works' },
   { href: '#integrations', label: 'Integrations' },
+  { href: '#roadmap', label: 'Roadmap' },
 ];
 
 /**
